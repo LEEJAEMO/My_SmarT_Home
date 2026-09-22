@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [string]$VmName = 'Home Assistant',
     [string]$HomeAssistantHost = 'homeassistant.local',
@@ -126,8 +126,10 @@ if ($smarthomeDeviceGuard) {
     $smarthomeResult.VirtualizationBasedSecurityStatus = $smarthomeDeviceGuard.VirtualizationBasedSecurityStatus
 }
 
-$smarthomeSystemInfo = systeminfo.exe 2>$null
-$smarthomeResult.WindowsHypervisorDetected = [bool]($smarthomeSystemInfo | Select-String -Pattern 'A hypervisor has been detected|하이퍼바이저가 검색되었습니다' -CaseSensitive:$false)
+$smarthomeComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction SilentlyContinue
+if ($null -ne $smarthomeComputerSystem -and $null -ne $smarthomeComputerSystem.HypervisorPresent) {
+    $smarthomeResult.WindowsHypervisorDetected = [bool]$smarthomeComputerSystem.HypervisorPresent
+}
 
 try {
     $smarthomeResult.ResolvedAddresses = @(
