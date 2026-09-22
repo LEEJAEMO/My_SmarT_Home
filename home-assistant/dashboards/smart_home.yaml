@@ -64,14 +64,14 @@ views:
         title: 선풍기
         show_header_toggle: false
         entities:
-          - entity: script.fan_low
-          - entity: script.fan_medium
-          - entity: script.fan_high
-          - entity: script.fan_low_2h
-          - entity: script.fan_oscillate
-          - entity: script.fan_natural
-          - entity: script.fan_off
-          - entity: input_select.fan_assumed_speed
+          - entity: script.fan_power
+            name: 전원
+          - entity: script.fan_speed_cycle
+            name: 풍량 변경
+          - entity: script.fan_timer_cycle
+            name: 타이머 변경
+          - entity: script.fan_mute_toggle
+            name: 음소거
 
       - type: entities
         title: 전등·프로젝터
