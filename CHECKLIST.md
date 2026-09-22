@@ -55,7 +55,7 @@ SwitchBot 앱의 `프로필 > 환경설정 > 개발자 옵션`에서 Token과 Se
 
 ## 3. Home Assistant 최초 설정과 파일 배포
 
-1. `http://homeassistant.local:8123`에서 최초 관리자 계정을 만들고 집 위치·시간대를 실제 주소와 `Asia/Tokyo`로 확인합니다.
+1. `http://homeassistant.local`에서 최초 관리자 계정을 만들고 집 위치·시간대를 실제 주소와 `Asia/Tokyo`로 확인합니다. 열리지 않을 때만 `http://homeassistant.local:8123`을 시도합니다.
 2. `설정 > 애드온 > 애드온 스토어`에서 `File editor`를 설치합니다.
 3. 이 폴더의 `home-assistant/custom_components`, `packages`, `custom_sentences`, `dashboards`를 HA의 `/config` 아래 같은 경로로 복사합니다.
 4. `configuration.yaml.example` 내용을 기존 `/config/configuration.yaml`에 병합합니다. 기존 `default_config:`는 삭제하지 않습니다.
@@ -121,5 +121,5 @@ Meter Pro CO₂는 USB 5V에 연결해 약 1분 갱신 주기로 사용합니다
 - [ ] S23가 홈 존을 벗어난 뒤 10분 후 외출 장면 시험
 - [ ] 28℃ 초과/16℃ 미만 귀가 분기 시험
 - [ ] CO₂ 1000/1500 알림과 800 미만 10분 환기 완료 알림 시험
-- [ ] Galaxy Book 재부팅 후 VM 자동 시작과 `homeassistant.local:8123` 복구 시험
+- [ ] Galaxy Book 재부팅 후 VM 자동 시작과 `http://homeassistant.local` 복구 시험(필요 시 `:8123` 대체 포트 확인)
 - [ ] Galaxy Book 종료 중 SwitchBot 앱, SmartThings 기본 제어, CO₂ 독립 알림 시험
