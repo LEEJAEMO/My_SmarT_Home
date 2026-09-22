@@ -1,4 +1,16 @@
-# 이 파일 전체로 configuration.yaml을 덮어쓰지 말고, 없는 항목만 병합하세요.
+# Home Assistant deployment configuration
+# Managed from the ha-deploy branch. Keep real secrets only in /config/secrets.yaml.
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
 
 homeassistant:
   packages: !include_dir_named packages
