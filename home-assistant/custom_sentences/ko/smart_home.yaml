@@ -21,21 +21,24 @@ intents:
         slots:
           action_name: aircon_off
       - sentences:
-          - "선풍기[를] 약풍[으로] (켜|켜 줘|맞춰|맞춰 줘)"
+          - "선풍기 전원"
+          - "선풍기[의] 전원[을] (눌러|눌러 줘|전환해|전환해 줘)"
         slots:
-          action_name: fan_low
+          action_name: fan_power
       - sentences:
-          - "선풍기[를] 중풍[으로] (켜|켜 줘|맞춰|맞춰 줘)"
+          - "선풍기 풍량[을] (바꿔|바꿔 줘|변경해|변경해 줘)"
+          - "선풍기 풍량 다음"
         slots:
-          action_name: fan_medium
+          action_name: fan_speed_cycle
       - sentences:
-          - "선풍기[를] 강풍[으로] (켜|켜 줘|맞춰|맞춰 줘)"
+          - "선풍기 타이머[를] (바꿔|바꿔 줘|변경해|변경해 줘)"
+          - "선풍기 타이머 다음"
         slots:
-          action_name: fan_high
+          action_name: fan_timer_cycle
       - sentences:
-          - "선풍기[를] (꺼|꺼 줘)"
+          - "선풍기 음소거[를] (전환해|전환해 줘|눌러|눌러 줘)"
         slots:
-          action_name: fan_off
+          action_name: fan_mute_toggle
       - sentences:
           - "기상 (모드|장면)[를] (실행해|실행해 줘|시작해|시작해 줘)"
         slots:
