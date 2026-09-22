@@ -1,0 +1,100 @@
+title: 스마트홈
+views:
+  - title: 홈
+    path: home
+    icon: mdi:home
+    cards:
+      - type: grid
+        title: 장면
+        columns: 3
+        square: false
+        cards:
+          - type: button
+            entity: script.scene_wake
+            name: 기상
+            icon: mdi:weather-sunset-up
+            tap_action:
+              action: toggle
+          - type: button
+            entity: script.scene_away
+            name: 외출
+            icon: mdi:home-export-outline
+            tap_action:
+              action: toggle
+          - type: button
+            entity: script.scene_arrival
+            name: 귀가
+            icon: mdi:home-import-outline
+            tap_action:
+              action: toggle
+          - type: button
+            entity: script.scene_movie
+            name: 영화
+            icon: mdi:movie-open
+            tap_action:
+              action: toggle
+          - type: button
+            entity: script.scene_sleep
+            name: 수면
+            icon: mdi:sleep
+            tap_action:
+              action: toggle
+          - type: button
+            entity: script.scene_ventilation
+            name: 환기
+            icon: mdi:window-open-variant
+            tap_action:
+              action: toggle
+
+      - type: entities
+        title: 에어컨 프리셋
+        show_header_toggle: false
+        entities:
+          - entity: script.aircon_cool_26
+            name: 냉방 26도
+          - entity: script.aircon_heat_20
+            name: 난방 20도
+          - entity: script.aircon_dry
+            name: 제습
+          - entity: script.aircon_off
+            name: 끄기
+          - entity: input_select.aircon_assumed_mode
+
+      - type: entities
+        title: 선풍기
+        show_header_toggle: false
+        entities:
+          - entity: script.fan_low
+          - entity: script.fan_medium
+          - entity: script.fan_high
+          - entity: script.fan_low_2h
+          - entity: script.fan_oscillate
+          - entity: script.fan_natural
+          - entity: script.fan_off
+          - entity: input_select.fan_assumed_speed
+
+      - type: entities
+        title: 전등·프로젝터
+        show_header_toggle: false
+        entities:
+          - entity: script.light_on
+          - entity: script.light_off
+          - entity: script.light_brighter
+          - entity: script.light_dimmer
+          - entity: script.projector_on
+          - entity: script.projector_off
+          - entity: input_boolean.projector_discrete_power
+            name: 프로젝터 ON/OFF 분리 코드
+          - entity: input_boolean.projector_assumed_on
+
+      - type: entities
+        title: 연결 설정
+        show_header_toggle: false
+        entities:
+          - entity: input_text.smarthome_resident_person
+          - entity: input_text.smarthome_curtain_entity
+          - entity: input_text.smarthome_co2_entity
+          - entity: input_text.smarthome_temperature_entity
+          - entity: input_text.smarthome_notify_service
+          - entity: input_boolean.ventilation_active
+

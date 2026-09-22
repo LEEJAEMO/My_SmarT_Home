@@ -1,0 +1,39 @@
+# Home Assistant secrets and runtime state
+home-assistant/secrets.yaml
+home-assistant/.storage/
+home-assistant/.cloud/
+home-assistant/home-assistant_v2.db*
+home-assistant/home-assistant.log*
+home-assistant/backups/
+*.tar
+
+# Credentials and local environment files
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Downloaded virtual-machine artifacts
+*.vdi
+*.vmdk
+*.vhd
+*.vhdx
+*.ova
+*.zip
+
+# Python and editor artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.idea/
+.vscode/
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+

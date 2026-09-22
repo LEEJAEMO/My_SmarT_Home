@@ -1,0 +1,11 @@
+{
+  "domain": "switchbot_ir_allowlist",
+  "name": "SwitchBot IR Allowlist",
+  "codeowners": [],
+  "config_flow": false,
+  "documentation": "https://github.com/OpenWonderLabs/SwitchBotAPI",
+  "integration_type": "service",
+  "iot_class": "assumed_state",
+  "requirements": [],
+  "version": "1.0.0"
+}

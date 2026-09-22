@@ -1,0 +1,11 @@
+send:
+  name: 허용된 IR 명령 실행
+  description: configuration.yaml에 미리 등록한 SwitchBot 적외선 명령만 실행합니다.
+  fields:
+    action:
+      name: 허용 목록 이름
+      description: "예: daikin_cool_26, fan_high, light_off"
+      required: true
+      example: daikin_cool_26
+      selector:
+        text:

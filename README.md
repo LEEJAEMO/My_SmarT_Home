@@ -51,4 +51,3 @@ AI에는 장면과 프리셋 스크립트만 노출합니다. SwitchBot 토큰, 
 GitHub 저장소를 ChatGPT의 GitHub 커넥터에 연결한 뒤, 새 작업에서는 저장소 이름 `LEEJAEMO/My_SmarT_Home`과 원하는 변경을 함께 지정합니다. 에이전트는 먼저 `AGENTS.md`를 읽고 비밀값·IR 안전 규칙·검증 절차를 따라야 합니다.
 
 실제 Token, Secret, API 키, Home Assistant의 `/config/.storage`, 데이터베이스, 백업, VM 디스크는 공개 저장소에 올리지 않습니다. 저장소에는 `secrets.yaml.example`처럼 자리표시자만 유지합니다.
-

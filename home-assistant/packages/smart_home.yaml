@@ -1,0 +1,671 @@
+# 구형 적외선 가전 중심 스마트홈 패키지
+# Home Assistant UI의 설정 > 장치 및 서비스 > 도우미에서 아래 input_text 값을
+# 실제 엔티티/알림 서비스 이름으로 바꿀 수 있습니다.
+
+input_text:
+  smarthome_resident_person:
+    name: 스마트홈 재실 사용자 엔티티
+    initial: person.jason
+    max: 100
+  smarthome_curtain_entity:
+    name: SwitchBot 커튼 엔티티
+    initial: cover.switchbot_curtain
+    max: 100
+  smarthome_co2_entity:
+    name: SwitchBot CO2 엔티티
+    initial: sensor.switchbot_meter_pro_co2_carbon_dioxide
+    max: 100
+  smarthome_temperature_entity:
+    name: SwitchBot 실내 온도 엔티티
+    initial: sensor.switchbot_meter_pro_co2_temperature
+    max: 100
+  smarthome_notify_service:
+    name: S23 알림 서비스
+    initial: notify.mobile_app_galaxy_s23_ultra
+    max: 100
+
+input_boolean:
+  aircon_assumed_on:
+    name: 에어컨 추정 전원
+    icon: mdi:air-conditioner
+  fan_assumed_on:
+    name: 선풍기 추정 전원
+    icon: mdi:fan
+  projector_assumed_on:
+    name: 프로젝터 추정 전원
+    icon: mdi:projector
+  projector_discrete_power:
+    name: 프로젝터 ON/OFF 분리 코드 사용
+    icon: mdi:power-settings
+  ventilation_active:
+    name: 환기 장면 실행 중
+    icon: mdi:window-open-variant
+
+input_select:
+  aircon_assumed_mode:
+    name: 에어컨 추정 운전 상태
+    options:
+      - 꺼짐
+      - 냉방26
+      - 난방20
+      - 제습
+    initial: 꺼짐
+    icon: mdi:air-conditioner
+  fan_assumed_speed:
+    name: 선풍기 추정 풍량
+    options:
+      - 꺼짐
+      - 약풍
+      - 중풍
+      - 강풍
+    initial: 꺼짐
+    icon: mdi:fan-speed-2
+
+script:
+  aircon_cool_26:
+    alias: 에어컨 냉방 26도 시작
+    description: 구형 다이킨 에어컨을 냉방 26도·풍량 자동 프리셋으로 켭니다. 다른 냉방 온도에는 사용하지 않습니다.
+    icon: mdi:snowflake
+    mode: single
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: daikin_cool_26
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.aircon_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.aircon_assumed_mode
+        data:
+          option: 냉방26
+
+  aircon_heat_20:
+    alias: 에어컨 난방 20도 시작
+    description: 구형 다이킨 에어컨을 난방 20도·풍량 자동 프리셋으로 켭니다. 다른 난방 온도에는 사용하지 않습니다.
+    icon: mdi:fire
+    mode: single
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: daikin_heat_20
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.aircon_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.aircon_assumed_mode
+        data:
+          option: 난방20
+
+  aircon_dry:
+    alias: 에어컨 제습 시작
+    description: 구형 다이킨 에어컨을 미리 학습한 제습 프리셋으로 켭니다.
+    icon: mdi:water-percent
+    mode: single
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: daikin_dry
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.aircon_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.aircon_assumed_mode
+        data:
+          option: 제습
+
+  aircon_off:
+    alias: 에어컨 끄기
+    description: 구형 다이킨 에어컨에 확정 OFF 적외선 신호를 보냅니다.
+    icon: mdi:air-conditioner
+    mode: queued
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: daikin_off
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.aircon_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.aircon_assumed_mode
+        data:
+          option: 꺼짐
+
+  fan_low:
+    alias: 선풍기 약풍
+    description: Comfee 선풍기를 켜고 약풍으로 맞춥니다.
+    icon: mdi:fan-speed-1
+    mode: single
+    sequence:
+      - if:
+          - condition: state
+            entity_id: input_boolean.fan_assumed_on
+            state: "off"
+        then:
+          - action: switchbot_ir_allowlist.send
+            data:
+              action: fan_power
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_low
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.fan_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.fan_assumed_speed
+        data:
+          option: 약풍
+
+  fan_medium:
+    alias: 선풍기 중풍
+    description: Comfee 선풍기를 켜고 중풍으로 맞춥니다.
+    icon: mdi:fan-speed-2
+    mode: single
+    sequence:
+      - if:
+          - condition: state
+            entity_id: input_boolean.fan_assumed_on
+            state: "off"
+        then:
+          - action: switchbot_ir_allowlist.send
+            data:
+              action: fan_power
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_medium
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.fan_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.fan_assumed_speed
+        data:
+          option: 중풍
+
+  fan_high:
+    alias: 선풍기 강풍
+    description: Comfee 선풍기를 켜고 강풍으로 맞춥니다.
+    icon: mdi:fan-speed-3
+    mode: single
+    sequence:
+      - if:
+          - condition: state
+            entity_id: input_boolean.fan_assumed_on
+            state: "off"
+        then:
+          - action: switchbot_ir_allowlist.send
+            data:
+              action: fan_power
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_high
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.fan_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.fan_assumed_speed
+        data:
+          option: 강풍
+
+  fan_off:
+    alias: 선풍기 끄기
+    description: Home Assistant가 선풍기를 켰다고 기록한 경우에만 전원 토글 신호를 보냅니다.
+    icon: mdi:fan-off
+    mode: single
+    sequence:
+      - condition: state
+        entity_id: input_boolean.fan_assumed_on
+        state: "on"
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_power
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.fan_assumed_on
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.fan_assumed_speed
+        data:
+          option: 꺼짐
+
+  fan_oscillate:
+    alias: 선풍기 회전 전환
+    description: 켜져 있는 Comfee 선풍기의 회전 기능을 전환합니다.
+    icon: mdi:rotate-360
+    mode: single
+    sequence:
+      - condition: state
+        entity_id: input_boolean.fan_assumed_on
+        state: "on"
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_oscillate
+
+  fan_natural:
+    alias: 선풍기 자연풍
+    description: Comfee 선풍기를 켜고 자연풍 버튼을 실행합니다.
+    icon: mdi:weather-windy
+    mode: single
+    sequence:
+      - if:
+          - condition: state
+            entity_id: input_boolean.fan_assumed_on
+            state: "off"
+        then:
+          - action: switchbot_ir_allowlist.send
+            data:
+              action: fan_power
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_natural
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.fan_assumed_on
+
+  fan_low_2h:
+    alias: 선풍기 약풍 2시간
+    description: Comfee 선풍기를 약풍으로 켜고 2시간 타이머를 설정합니다.
+    icon: mdi:fan-clock
+    mode: single
+    sequence:
+      - action: script.fan_low
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: fan_timer_2h
+
+  light_on:
+    alias: 전등 켜기
+    description: 방 전등에 확정 ON 적외선 신호를 보냅니다.
+    icon: mdi:lightbulb-on
+    mode: queued
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: light_on
+
+  light_off:
+    alias: 전등 끄기
+    description: 방 전등에 확정 OFF 적외선 신호를 보냅니다.
+    icon: mdi:lightbulb-off
+    mode: queued
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: light_off
+
+  light_brighter:
+    alias: 전등 밝게
+    description: 방 전등 밝기를 한 단계 올립니다.
+    icon: mdi:brightness-7
+    mode: queued
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: light_brighter
+
+  light_dimmer:
+    alias: 전등 어둡게
+    description: 방 전등 밝기를 한 단계 낮춥니다.
+    icon: mdi:brightness-5
+    mode: queued
+    sequence:
+      - action: switchbot_ir_allowlist.send
+        data:
+          action: light_dimmer
+
+  projector_on:
+    alias: 프로젝터 켜기
+    description: 프로젝터를 켭니다. 분리 ON 코드 또는 추정 상태가 꺼짐인 전원 토글만 사용합니다.
+    icon: mdi:projector
+    mode: single
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.projector_discrete_power
+                state: "on"
+            sequence:
+              - action: switchbot_ir_allowlist.send
+                data:
+                  action: projector_on
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.projector_assumed_on
+                state: "off"
+            sequence:
+              - action: switchbot_ir_allowlist.send
+                data:
+                  action: projector_power
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.projector_assumed_on
+
+  projector_off:
+    alias: 프로젝터 끄기
+    description: 프로젝터를 정상 종료합니다. 전원 토글형이면 Home Assistant가 켰다고 기록한 경우에만 실행합니다.
+    icon: mdi:projector-off
+    mode: single
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.projector_discrete_power
+                state: "on"
+            sequence:
+              - action: switchbot_ir_allowlist.send
+                data:
+                  action: projector_off
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.projector_assumed_on
+                state: "on"
+            sequence:
+              - action: switchbot_ir_allowlist.send
+                data:
+                  action: projector_power
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.projector_assumed_on
+
+  scene_wake:
+    alias: 기상
+    description: 커튼을 열고 전등을 켜는 기상 장면입니다.
+    icon: mdi:weather-sunset-up
+    mode: single
+    sequence:
+      - action: cover.open_cover
+        target:
+          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+      - action: script.light_on
+
+  scene_away:
+    alias: 외출
+    description: 에어컨·선풍기·전등을 끄고 커튼을 닫는 외출 장면입니다. 프로젝터는 분리 OFF 코드가 있을 때만 끕니다.
+    icon: mdi:home-export-outline
+    mode: single
+    sequence:
+      - action: script.aircon_off
+      - action: script.fan_off
+      - action: script.light_off
+      - action: cover.close_cover
+        target:
+          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+      - if:
+          - condition: state
+            entity_id: input_boolean.projector_discrete_power
+            state: "on"
+        then:
+          - action: script.projector_off
+
+  scene_arrival:
+    alias: 귀가
+    description: 낮에는 커튼, 밤에는 전등을 제어하고 실내 온도에 따라 안전한 에어컨 프리셋을 실행하는 귀가 장면입니다.
+    icon: mdi:home-import-outline
+    mode: single
+    sequence:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: sun.sun
+                state: above_horizon
+            sequence:
+              - action: cover.open_cover
+                target:
+                  entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+        default:
+          - action: script.light_on
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states(states('input_text.smarthome_temperature_entity')) | float(-999) > 28 }}
+            sequence:
+              - action: script.aircon_cool_26
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states(states('input_text.smarthome_temperature_entity')) | float(999) < 16 }}
+            sequence:
+              - action: script.aircon_heat_20
+
+  scene_movie:
+    alias: 영화
+    description: 커튼을 닫고 전등을 끈 뒤 2초 이상 간격을 두고 프로젝터를 켜는 영화 장면입니다.
+    icon: mdi:movie-open
+    mode: single
+    sequence:
+      - action: cover.close_cover
+        target:
+          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+      - action: script.light_off
+      - delay: "00:00:02"
+      - action: script.projector_on
+
+  scene_sleep:
+    alias: 수면
+    description: 커튼과 조명을 정리하고 선풍기 약풍 2시간 및 온도 조건부 에어컨 프리셋을 실행하는 수면 장면입니다.
+    icon: mdi:sleep
+    mode: single
+    sequence:
+      - action: cover.close_cover
+        target:
+          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+      - action: script.light_off
+      - action: script.projector_off
+      - action: script.fan_low_2h
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states(states('input_text.smarthome_temperature_entity')) | float(-999) >= 24 }}
+            sequence:
+              - action: script.aircon_cool_26
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states(states('input_text.smarthome_temperature_entity')) | float(999) <= 18 }}
+            sequence:
+              - action: script.aircon_heat_20
+
+  scene_ventilation:
+    alias: 환기
+    description: 사용자가 창문을 연 뒤 실행합니다. 에어컨을 끄고 선풍기를 강풍으로 켭니다.
+    icon: mdi:window-open-variant
+    mode: single
+    sequence:
+      - action: script.aircon_off
+      - action: script.fan_high
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.ventilation_active
+
+intent_script:
+  SmartHomePreset:
+    action:
+      - choose:
+          - conditions: "{{ action_name == 'aircon_cool_26' }}"
+            sequence:
+              - action: script.aircon_cool_26
+          - conditions: "{{ action_name == 'aircon_heat_20' }}"
+            sequence:
+              - action: script.aircon_heat_20
+          - conditions: "{{ action_name == 'aircon_dry' }}"
+            sequence:
+              - action: script.aircon_dry
+          - conditions: "{{ action_name == 'aircon_off' }}"
+            sequence:
+              - action: script.aircon_off
+          - conditions: "{{ action_name == 'fan_low' }}"
+            sequence:
+              - action: script.fan_low
+          - conditions: "{{ action_name == 'fan_medium' }}"
+            sequence:
+              - action: script.fan_medium
+          - conditions: "{{ action_name == 'fan_high' }}"
+            sequence:
+              - action: script.fan_high
+          - conditions: "{{ action_name == 'fan_off' }}"
+            sequence:
+              - action: script.fan_off
+          - conditions: "{{ action_name == 'scene_wake' }}"
+            sequence:
+              - action: script.scene_wake
+          - conditions: "{{ action_name == 'scene_away' }}"
+            sequence:
+              - action: script.scene_away
+          - conditions: "{{ action_name == 'scene_arrival' }}"
+            sequence:
+              - action: script.scene_arrival
+          - conditions: "{{ action_name == 'scene_movie' }}"
+            sequence:
+              - action: script.scene_movie
+          - conditions: "{{ action_name == 'scene_sleep' }}"
+            sequence:
+              - action: script.scene_sleep
+          - conditions: "{{ action_name == 'scene_ventilation' }}"
+            sequence:
+              - action: script.scene_ventilation
+    speech:
+      text: >-
+        {% set answers = {
+          'aircon_cool_26': '에어컨을 냉방 26도로 켰습니다.',
+          'aircon_heat_20': '에어컨을 난방 20도로 켰습니다.',
+          'aircon_dry': '에어컨 제습을 시작했습니다.',
+          'aircon_off': '에어컨을 껐습니다.',
+          'fan_low': '선풍기를 약풍으로 맞췄습니다.',
+          'fan_medium': '선풍기를 중풍으로 맞췄습니다.',
+          'fan_high': '선풍기를 강풍으로 맞췄습니다.',
+          'fan_off': '선풍기를 껐습니다.',
+          'scene_wake': '기상 장면을 실행했습니다.',
+          'scene_away': '외출 장면을 실행했습니다.',
+          'scene_arrival': '귀가 장면을 실행했습니다.',
+          'scene_movie': '영화 장면을 실행했습니다.',
+          'scene_sleep': '수면 장면을 실행했습니다.',
+          'scene_ventilation': '환기를 시작했습니다. 창문을 열어 주세요.'
+        } %}
+        {{ answers.get(action_name, '지원하지 않는 명령입니다.') }}
+
+automation:
+  - id: smarthome_wake_after_sunrise
+    alias: 스마트홈 - 일출 기반 기상
+    mode: single
+    trigger:
+      - platform: sun
+        event: sunrise
+        offset: "00:30:00"
+        id: sunrise_plus_30
+      - platform: time
+        at: "06:30:00"
+        id: earliest_0630
+    condition:
+      - condition: template
+        value_template: >-
+          {{ is_state(states('input_text.smarthome_resident_person'), 'home') }}
+      - condition: or
+        conditions:
+          - condition: and
+            conditions:
+              - condition: trigger
+                id: sunrise_plus_30
+              - condition: time
+                after: "06:29:59"
+          - condition: and
+            conditions:
+              - condition: trigger
+                id: earliest_0630
+              - condition: state
+                entity_id: sun.sun
+                state: above_horizon
+              - condition: template
+                value_template: >-
+                  {{ (as_timestamp(now()) - as_timestamp(states.sun.sun.last_changed)) >= 1800 }}
+    action:
+      - action: script.scene_wake
+
+  - id: smarthome_away_after_10_minutes
+    alias: 스마트홈 - 10분 외출 감지
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {% set person_state = states(states('input_text.smarthome_resident_person')) %}
+          {{ person_state not in ['home', 'unknown', 'unavailable', 'none', ''] }}
+        for: "00:10:00"
+    action:
+      - action: script.scene_away
+
+  - id: smarthome_arrival
+    alias: 스마트홈 - 귀가 감지
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {{ is_state(states('input_text.smarthome_resident_person'), 'home') }}
+    action:
+      - action: script.scene_arrival
+
+  - id: smarthome_co2_notice_1000
+    alias: 스마트홈 - CO2 1000ppm 환기 알림
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {% set co2 = states(states('input_text.smarthome_co2_entity')) | float(0) %}
+          {{ co2 >= 1000 and co2 < 1500 }}
+    action:
+      - action: "{{ states('input_text.smarthome_notify_service') }}"
+        data:
+          title: "환기가 필요합니다"
+          message: "실내 CO₂가 1000ppm 이상입니다. 창문을 열고 ‘환기 시작’이라고 말해 주세요."
+          data:
+            tag: smarthome_co2_warning
+
+  - id: smarthome_co2_urgent_1500
+    alias: 스마트홈 - CO2 1500ppm 긴급 알림
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {{ states(states('input_text.smarthome_co2_entity')) | float(0) >= 1500 }}
+    action:
+      - action: "{{ states('input_text.smarthome_notify_service') }}"
+        data:
+          title: "긴급 환기 필요"
+          message: "실내 CO₂가 1500ppm 이상입니다. 지금 창문을 열어 충분히 환기해 주세요."
+          data:
+            tag: smarthome_co2_urgent
+            channel: alarm_stream
+            importance: high
+            ttl: 0
+            priority: high
+
+  - id: smarthome_ventilation_complete
+    alias: 스마트홈 - 환기 완료 감지
+    mode: single
+    trigger:
+      - platform: template
+        value_template: >-
+          {% set co2 = states(states('input_text.smarthome_co2_entity')) | float(0) %}
+          {{ co2 > 0 and co2 < 800 }}
+        for: "00:10:00"
+    condition:
+      - condition: state
+        entity_id: input_boolean.ventilation_active
+        state: "on"
+    action:
+      - action: script.fan_off
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.ventilation_active
+      - action: "{{ states('input_text.smarthome_notify_service') }}"
+        data:
+          title: "환기 완료"
+          message: "CO₂가 800ppm 아래로 10분간 유지됐습니다. 선풍기를 껐습니다. 창문을 직접 닫아 주세요."
+          data:
+            tag: smarthome_ventilation_complete
+

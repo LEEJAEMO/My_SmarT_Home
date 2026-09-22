@@ -1,0 +1,93 @@
+# 이 파일 전체로 configuration.yaml을 덮어쓰지 말고, 없는 항목만 병합하세요.
+
+homeassistant:
+  packages: !include_dir_named packages
+
+conversation:
+
+lovelace:
+  dashboards:
+    smart-home:
+      mode: yaml
+      title: 스마트홈
+      icon: mdi:home-assistant
+      show_in_sidebar: true
+      filename: dashboards/smart_home.yaml
+
+switchbot_ir_allowlist:
+  token: !secret switchbot_api_token
+  secret: !secret switchbot_api_secret
+  min_gap_seconds: 2
+  commands:
+    daikin_cool_26:
+      device_id: !secret switchbot_daikin_cool_device_id
+      command: turnOn
+      command_type: command
+    daikin_heat_20:
+      device_id: !secret switchbot_daikin_heat_device_id
+      command: turnOn
+      command_type: command
+    daikin_dry:
+      device_id: !secret switchbot_daikin_dry_device_id
+      command: turnOn
+      command_type: command
+    daikin_off:
+      device_id: !secret switchbot_daikin_off_device_id
+      command: turnOff
+      command_type: command
+    fan_power:
+      device_id: !secret switchbot_fan_device_id
+      command: 전원
+      command_type: customize
+    fan_low:
+      device_id: !secret switchbot_fan_device_id
+      command: 약풍
+      command_type: customize
+    fan_medium:
+      device_id: !secret switchbot_fan_device_id
+      command: 중풍
+      command_type: customize
+    fan_high:
+      device_id: !secret switchbot_fan_device_id
+      command: 강풍
+      command_type: customize
+    fan_oscillate:
+      device_id: !secret switchbot_fan_device_id
+      command: 회전
+      command_type: customize
+    fan_natural:
+      device_id: !secret switchbot_fan_device_id
+      command: 자연풍
+      command_type: customize
+    fan_timer_2h:
+      device_id: !secret switchbot_fan_device_id
+      command: 2시간타이머
+      command_type: customize
+    light_on:
+      device_id: !secret switchbot_light_device_id
+      command: ON
+      command_type: customize
+    light_off:
+      device_id: !secret switchbot_light_device_id
+      command: OFF
+      command_type: customize
+    light_brighter:
+      device_id: !secret switchbot_light_device_id
+      command: 밝기증가
+      command_type: customize
+    light_dimmer:
+      device_id: !secret switchbot_light_device_id
+      command: 밝기감소
+      command_type: customize
+    projector_on:
+      device_id: !secret switchbot_projector_device_id
+      command: ON
+      command_type: customize
+    projector_off:
+      device_id: !secret switchbot_projector_device_id
+      command: OFF
+      command_type: customize
+    projector_power:
+      device_id: !secret switchbot_projector_device_id
+      command: 전원
+      command_type: customize
