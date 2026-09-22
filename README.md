@@ -36,7 +36,16 @@ flowchart LR
 
 ## 안전 설계
 
-AI에는 장면과 프리셋 스크립트만 노출합니다. SwitchBot 토큰, 장치 ID, 임의 명령을 받는 서비스는 노출하지 않습니다. 적외선 명령은 전역 잠금으로 최소 2초 간격을 보장하며 자동 재시도하지 않습니다. 전원 토글만 있는 선풍기·프로젝터는 Home Assistant가 기록한 추정 상태를 기준으로 동작합니다.
+AI에는 장면과 프리셋 스크립트만 노출합니다. SwitchBot 토큰, 장치 ID, 임의 명령을 받는 서비스는 노출하지 않습니다. 적외선 명령은 전역 잠금으로 최소 2초 간격을 보장하며 자동 재시도하지 않습니다. Comfee 선풍기는 상태를 읽을 수 없는 `Others` IR 리모컨으로 운용하며 전원·풍량·타이머·음소거를 토글/순환 버튼으로만 제어합니다. 선풍기는 목표 상태 자동화를 하지 않고, 프로젝터가 토글형일 때만 추정 상태 가드를 유지합니다.
+
+## Comfee 선풍기 최종 사양
+
+- SwitchBot 리모컨 유형: `Others`
+- OpenAPI 명령 방식: `command_type: customize`
+- 실제 사용 버튼명: `POWER`, `Fan Speed 3`, `Timer`, `Mute`
+- Home Assistant 동작: `fan_power`, `fan_speed_cycle`, `fan_timer_cycle`, `fan_mute_toggle`
+- `POWER`는 전원 토글, `Fan Speed 3`은 1 → 2 → 3 → 1 순환, `Timer`는 1시간 → … → 6시간 순환, `Mute`는 음소거 토글로 취급합니다.
+- 실제 IR 가상 리모컨 `deviceId`는 공개 저장소에 기록하지 않고 `/config/secrets.yaml`의 `switchbot_fan_device_id`에만 저장합니다.
 
 ## 적용 순서
 
