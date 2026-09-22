@@ -22,6 +22,9 @@
 - Python 사용자 통합 컴파일 통과
 - YAML·JSON 파싱 통과
 - Home Assistant에서 호출하는 IR 작업 18개가 허용 목록 18개에 모두 존재함을 확인
+- Comfee 선풍기를 SwitchBot `Others` IR 리모컨으로 등록하고 `POWER`, `Fan Speed 3`, `Timer`, `Mute` custom 명령이 Home Assistant에서 실제 동작함을 확인
+- Comfee 실제 가상 리모컨 ID는 `/config/secrets.yaml`에만 저장하고 공개 저장소에는 기록하지 않음
+- Home Assistant `/config`가 Git `ha-deploy` 브랜치를 추적하도록 전환하고 `configuration.yaml` 및 기존 `secrets.yaml` 보존 확인
 - Git diff 형식 검사와 비밀값 패턴 검사 통과
 
 ## 현재 접속 주소
@@ -41,15 +44,17 @@ http://homeassistant.local
 
 백업과 증거 파일은 공개 GitHub 저장소에 올리지 않는다.
 
-## 사용자 계정·물리 작업 대기
+## 다음 구축 대상
 
-- SwitchBot 앱에서 IR 코드 학습과 5회 반복 시험
-- 포트 80 주소로 Home Assistant UI 로그인 확인
-- SwitchBot Cloud, Home Assistant Cloud, OpenAI, 필요 시 SmartThings 로그인
+- 다이킨 에어컨: 냉방 26℃ / 난방 20℃ / 제습 / OFF IR 학습 및 반복 시험
+- 전등: ON / OFF / 밝기 증가 / 밝기 감소 IR 학습 및 반복 시험
+- 프로젝터: 분리 ON/OFF 여부 확인, 정상 종료·냉각 검증
+- SwitchBot Hub Mini: 에어컨·전등·프로젝터까지 포함한 최종 IR 시야/배치 검증
+- SwitchBot Curtain: Home Assistant 실제 엔티티 연결 및 열기/닫기 동작 검증
+- Home Assistant Cloud, OpenAI, 필요 시 SmartThings 로그인
 - S23 위치·백그라운드·알림·기본 Assist 권한 설정
-- 실제 SwitchBot/OpenAPI 엔티티 및 장치 ID 입력
 - Station 버튼 루틴과 SwitchBot 독립 CO₂ 경보 생성
-- 실기기 전체 검증
+- 전체 장면 및 실기기 통합 검증
 
 ## 알려진 정상 지연
 
