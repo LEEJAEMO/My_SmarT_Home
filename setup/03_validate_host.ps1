@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [string]$VmName = 'Home Assistant'
+    [string]$VmName = 'Home Assistant',
+    [string]$HomeAssistantHost = 'homeassistant.local'
 )
 
 $ErrorActionPreference = 'Continue'
@@ -17,7 +18,58 @@ $smarthomeResults = [ordered]@{
     NetworkMode = $null
     BridgeAdapter = $null
     AutoStartTask = $false
+    HomeAssistantPort80 = $false
+    HomeAssistantPort8123 = $false
     HomeAssistantLocalPort = $false
+    HomeAssistantUrl = $null
+    ObserverPort4357 = $false
+}
+
+function Test-SmartHomeTcpPort {
+    param(
+        [Parameter(Mandatory)]
+        [string]$ComputerName,
+
+        [Parameter(Mandatory)]
+        [int]$Port,
+
+        [int]$TimeoutMilliseconds = 1500
+    )
+
+    try {
+        $smarthomeParsedAddress = $null
+        if ([System.Net.IPAddress]::TryParse($ComputerName, [ref]$smarthomeParsedAddress)) {
+            $smarthomeAddresses = @($smarthomeParsedAddress)
+        }
+        else {
+            $smarthomeAddresses = @([System.Net.Dns]::GetHostAddresses($ComputerName))
+        }
+    }
+    catch {
+        return $false
+    }
+
+    $smarthomeAddresses = @($smarthomeAddresses | Sort-Object @{ Expression = {
+        if ($_.AddressFamily -eq [System.Net.Sockets.AddressFamily]::InterNetwork) { 0 } else { 1 }
+    } })
+
+    foreach ($smarthomeAddress in $smarthomeAddresses) {
+        $smarthomeClient = [System.Net.Sockets.TcpClient]::new($smarthomeAddress.AddressFamily)
+        try {
+            $smarthomeConnect = $smarthomeClient.BeginConnect($smarthomeAddress, $Port, $null, $null)
+            if ($smarthomeConnect.AsyncWaitHandle.WaitOne($TimeoutMilliseconds, $false)) {
+                $smarthomeClient.EndConnect($smarthomeConnect)
+                if ($smarthomeClient.Connected) { return $true }
+            }
+        }
+        catch {
+            continue
+        }
+        finally {
+            $smarthomeClient.Dispose()
+        }
+    }
+    return $false
 }
 
 if ($smarthomeResults.VirtualBoxInstalled) {
@@ -37,7 +89,16 @@ if ($smarthomeResults.VirtualBoxInstalled) {
 }
 
 $smarthomeResults.AutoStartTask = $null -ne (Get-ScheduledTask -TaskName 'Home Assistant VM - Auto Start' -ErrorAction SilentlyContinue)
-$smarthomeResults.HomeAssistantLocalPort = Test-NetConnection -ComputerName 'homeassistant.local' -Port 8123 -InformationLevel Quiet -WarningAction SilentlyContinue
+$smarthomeResults.HomeAssistantPort80 = Test-SmartHomeTcpPort -ComputerName $HomeAssistantHost -Port 80
+$smarthomeResults.HomeAssistantPort8123 = Test-SmartHomeTcpPort -ComputerName $HomeAssistantHost -Port 8123
+$smarthomeResults.ObserverPort4357 = Test-SmartHomeTcpPort -ComputerName $HomeAssistantHost -Port 4357
+$smarthomeResults.HomeAssistantLocalPort = $smarthomeResults.HomeAssistantPort80 -or $smarthomeResults.HomeAssistantPort8123
+if ($smarthomeResults.HomeAssistantPort80) {
+    $smarthomeResults.HomeAssistantUrl = "http://$HomeAssistantHost"
+}
+elseif ($smarthomeResults.HomeAssistantPort8123) {
+    $smarthomeResults.HomeAssistantUrl = "http://${HomeAssistantHost}:8123"
+}
 
 [pscustomobject]$smarthomeResults | Format-List
 
@@ -48,4 +109,3 @@ if ($smarthomeResults.VmState -ne 'running' -or -not $smarthomeResults.HomeAssis
     exit 2
 }
 exit 0
-

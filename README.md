@@ -41,7 +41,7 @@ AI에는 장면과 프리셋 스크립트만 노출합니다. SwitchBot 토큰, 
 ## 적용 순서
 
 1. `setup/00_run_host_setup_as_admin.ps1`를 실행하고 Windows 관리자 승인을 허용해 VirtualBox와 VM을 만듭니다.
-2. 브라우저에서 `http://homeassistant.local:8123`을 열고 최초 계정을 생성합니다.
+2. 브라우저에서 `http://homeassistant.local`을 열고 최초 계정을 생성합니다. 열리지 않을 때만 `http://homeassistant.local:8123`을 시도합니다.
 3. File editor 또는 Samba share 애드온으로 `home-assistant/`의 파일을 `/config` 아래에 복사합니다.
 4. `configuration.yaml.example`의 내용을 실제 `/config/configuration.yaml`에 병합하고 `secrets.yaml.example`을 실제 값으로 채웁니다.
 5. Home Assistant에서 구성 검사를 통과한 뒤 재시작합니다.
@@ -52,3 +52,13 @@ AI에는 장면과 프리셋 스크립트만 노출합니다. SwitchBot 토큰, 
 GitHub 저장소를 ChatGPT의 GitHub 커넥터에 연결한 뒤, 새 작업에서는 저장소 이름 `LEEJAEMO/My_SmarT_Home`과 원하는 변경을 함께 지정합니다. 에이전트는 먼저 `AGENTS.md`를 읽고 비밀값·IR 안전 규칙·검증 절차를 따라야 합니다.
 
 실제 Token, Secret, API 키, Home Assistant의 `/config/.storage`, 데이터베이스, 백업, VM 디스크는 공개 저장소에 올리지 않습니다. 저장소에는 `secrets.yaml.example`처럼 자리표시자만 유지합니다.
+
+## HAOS VM 문제 진단
+
+Home Assistant 2026.8 이후 HAOS/Supervisor 설치는 기본적으로 포트 80을 사용합니다. `:8123`만 검사하면 정상 시스템을 장애로 오판할 수 있습니다.
+
+```powershell
+& '.\setup\05_diagnose_haos_vm.ps1'
+```
+
+위 스크립트는 VM과 네트워크를 변경하지 않고 포트 80·8123·Observer 4357, 브리지 필터, VBS/Memory Integrity, VirtualBox NEM snail mode를 확인합니다. 데이터 보존형 복구 절차와 NAT 격리 시험은 `docs/HAOS VirtualBox 진단 및 복구.md`를 따릅니다.

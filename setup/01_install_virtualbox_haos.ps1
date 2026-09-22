@@ -138,4 +138,4 @@ if ($LASTEXITCODE -ne 0) { throw 'Starting the Home Assistant VM failed.' }
 
 Write-Host ''
 Write-Host 'VM started. First-time setup can take 5 to 20 minutes.'
-Write-Host 'Open http://homeassistant.local:8123 when it is ready.'
+Write-Host 'Open http://homeassistant.local when it is ready. Use :8123 only if port 80 is unavailable.'

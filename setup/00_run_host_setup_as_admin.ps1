@@ -26,7 +26,7 @@ try {
     & (Join-Path $PSScriptRoot '02_configure_windows_host.ps1')
     Write-Host ''
     Write-Host 'Host setup completed successfully.' -ForegroundColor Green
-    Write-Host 'Open http://homeassistant.local:8123 after the first boot is ready.'
+    Write-Host 'Open http://homeassistant.local after the first boot is ready. Use :8123 only if port 80 is unavailable.'
     [void](Read-Host 'Press Enter to close this window')
 }
 catch {
