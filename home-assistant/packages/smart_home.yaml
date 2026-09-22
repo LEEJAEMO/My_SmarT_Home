@@ -28,9 +28,6 @@ input_boolean:
   aircon_assumed_on:
     name: 에어컨 추정 전원
     icon: mdi:air-conditioner
-  fan_assumed_on:
-    name: 선풍기 추정 전원
-    icon: mdi:fan
   projector_assumed_on:
     name: 프로젝터 추정 전원
     icon: mdi:projector
@@ -51,15 +48,6 @@ input_select:
       - 제습
     initial: 꺼짐
     icon: mdi:air-conditioner
-  fan_assumed_speed:
-    name: 선풍기 추정 풍량
-    options:
-      - 꺼짐
-      - 약풍
-      - 중풍
-      - 강풍
-    initial: 꺼짐
-    icon: mdi:fan-speed-2
 
 script:
   aircon_cool_26:
@@ -134,149 +122,45 @@ script:
         data:
           option: 꺼짐
 
-  fan_low:
-    alias: 선풍기 약풍
-    description: Comfee 선풍기를 켜고 약풍으로 맞춥니다.
-    icon: mdi:fan-speed-1
+  fan_power:
+    alias: 선풍기 전원
+    description: Comfee 선풍기의 POWER 버튼을 1회 전송합니다. 실제 전원 상태는 읽지 못하므로 토글 동작입니다.
+    icon: mdi:power
     mode: single
     sequence:
-      - if:
-          - condition: state
-            entity_id: input_boolean.fan_assumed_on
-            state: "off"
-        then:
-          - action: switchbot_ir_allowlist.send
-            data:
-              action: fan_power
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: fan_low
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.fan_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.fan_assumed_speed
-        data:
-          option: 약풍
-
-  fan_medium:
-    alias: 선풍기 중풍
-    description: Comfee 선풍기를 켜고 중풍으로 맞춥니다.
-    icon: mdi:fan-speed-2
-    mode: single
-    sequence:
-      - if:
-          - condition: state
-            entity_id: input_boolean.fan_assumed_on
-            state: "off"
-        then:
-          - action: switchbot_ir_allowlist.send
-            data:
-              action: fan_power
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: fan_medium
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.fan_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.fan_assumed_speed
-        data:
-          option: 중풍
-
-  fan_high:
-    alias: 선풍기 강풍
-    description: Comfee 선풍기를 켜고 강풍으로 맞춥니다.
-    icon: mdi:fan-speed-3
-    mode: single
-    sequence:
-      - if:
-          - condition: state
-            entity_id: input_boolean.fan_assumed_on
-            state: "off"
-        then:
-          - action: switchbot_ir_allowlist.send
-            data:
-              action: fan_power
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: fan_high
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.fan_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.fan_assumed_speed
-        data:
-          option: 강풍
-
-  fan_off:
-    alias: 선풍기 끄기
-    description: Home Assistant가 선풍기를 켰다고 기록한 경우에만 전원 토글 신호를 보냅니다.
-    icon: mdi:fan-off
-    mode: single
-    sequence:
-      - condition: state
-        entity_id: input_boolean.fan_assumed_on
-        state: "on"
       - action: switchbot_ir_allowlist.send
         data:
           action: fan_power
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.fan_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.fan_assumed_speed
-        data:
-          option: 꺼짐
 
-  fan_oscillate:
-    alias: 선풍기 회전 전환
-    description: 켜져 있는 Comfee 선풍기의 회전 기능을 전환합니다.
-    icon: mdi:rotate-360
+  fan_speed_cycle:
+    alias: 선풍기 풍량 변경
+    description: 풍량을 1 → 2 → 3 → 1 순서로 한 단계 변경합니다.
+    icon: mdi:fan
     mode: single
     sequence:
-      - condition: state
-        entity_id: input_boolean.fan_assumed_on
-        state: "on"
       - action: switchbot_ir_allowlist.send
         data:
-          action: fan_oscillate
+          action: fan_speed_cycle
 
-  fan_natural:
-    alias: 선풍기 자연풍
-    description: Comfee 선풍기를 켜고 자연풍 버튼을 실행합니다.
-    icon: mdi:weather-windy
+  fan_timer_cycle:
+    alias: 선풍기 타이머 변경
+    description: 타이머를 1시간 → 2시간 → … → 6시간 순서로 한 단계 변경합니다.
+    icon: mdi:timer-outline
     mode: single
     sequence:
-      - if:
-          - condition: state
-            entity_id: input_boolean.fan_assumed_on
-            state: "off"
-        then:
-          - action: switchbot_ir_allowlist.send
-            data:
-              action: fan_power
       - action: switchbot_ir_allowlist.send
         data:
-          action: fan_natural
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.fan_assumed_on
+          action: fan_timer_cycle
 
-  fan_low_2h:
-    alias: 선풍기 약풍 2시간
-    description: Comfee 선풍기를 약풍으로 켜고 2시간 타이머를 설정합니다.
-    icon: mdi:fan-clock
+  fan_mute_toggle:
+    alias: 선풍기 음소거 전환
+    description: Comfee 선풍기의 Mute 버튼을 1회 전송합니다.
+    icon: mdi:volume-mute
     mode: single
     sequence:
-      - action: script.fan_low
       - action: switchbot_ir_allowlist.send
         data:
-          action: fan_timer_2h
+          action: fan_mute_toggle
 
   light_on:
     alias: 전등 켜기
@@ -385,12 +269,11 @@ script:
 
   scene_away:
     alias: 외출
-    description: 에어컨·선풍기·전등을 끄고 커튼을 닫는 외출 장면입니다. 프로젝터는 분리 OFF 코드가 있을 때만 끕니다.
+    description: 에어컨과 전등을 끄고 커튼을 닫는 외출 장면입니다. 선풍기는 전원 토글 상태를 읽을 수 없어 자동 제어하지 않습니다. 프로젝터는 분리 OFF 코드가 있을 때만 끕니다.
     icon: mdi:home-export-outline
     mode: single
     sequence:
       - action: script.aircon_off
-      - action: script.fan_off
       - action: script.light_off
       - action: cover.close_cover
         target:
@@ -448,7 +331,7 @@ script:
 
   scene_sleep:
     alias: 수면
-    description: 커튼과 조명을 정리하고 선풍기 약풍 2시간 및 온도 조건부 에어컨 프리셋을 실행하는 수면 장면입니다.
+    description: 커튼과 조명을 정리하고 온도 조건부 에어컨 프리셋을 실행하는 수면 장면입니다. 선풍기는 전원·풍량·타이머가 순환/토글 방식이라 자동 제어하지 않습니다.
     icon: mdi:sleep
     mode: single
     sequence:
@@ -457,7 +340,6 @@ script:
           entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
       - action: script.light_off
       - action: script.projector_off
-      - action: script.fan_low_2h
       - choose:
           - conditions:
               - condition: template
@@ -474,12 +356,11 @@ script:
 
   scene_ventilation:
     alias: 환기
-    description: 사용자가 창문을 연 뒤 실행합니다. 에어컨을 끄고 선풍기를 강풍으로 켭니다.
+    description: 사용자가 창문을 연 뒤 실행합니다. 에어컨을 끄고 환기 상태를 기록합니다. 선풍기는 필요하면 별도 버튼으로 수동 제어합니다.
     icon: mdi:window-open-variant
     mode: single
     sequence:
       - action: script.aircon_off
-      - action: script.fan_high
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.ventilation_active
@@ -500,18 +381,18 @@ intent_script:
           - conditions: "{{ action_name == 'aircon_off' }}"
             sequence:
               - action: script.aircon_off
-          - conditions: "{{ action_name == 'fan_low' }}"
+          - conditions: "{{ action_name == 'fan_power' }}"
             sequence:
-              - action: script.fan_low
-          - conditions: "{{ action_name == 'fan_medium' }}"
+              - action: script.fan_power
+          - conditions: "{{ action_name == 'fan_speed_cycle' }}"
             sequence:
-              - action: script.fan_medium
-          - conditions: "{{ action_name == 'fan_high' }}"
+              - action: script.fan_speed_cycle
+          - conditions: "{{ action_name == 'fan_timer_cycle' }}"
             sequence:
-              - action: script.fan_high
-          - conditions: "{{ action_name == 'fan_off' }}"
+              - action: script.fan_timer_cycle
+          - conditions: "{{ action_name == 'fan_mute_toggle' }}"
             sequence:
-              - action: script.fan_off
+              - action: script.fan_mute_toggle
           - conditions: "{{ action_name == 'scene_wake' }}"
             sequence:
               - action: script.scene_wake
@@ -537,10 +418,10 @@ intent_script:
           'aircon_heat_20': '에어컨을 난방 20도로 켰습니다.',
           'aircon_dry': '에어컨 제습을 시작했습니다.',
           'aircon_off': '에어컨을 껐습니다.',
-          'fan_low': '선풍기를 약풍으로 맞췄습니다.',
-          'fan_medium': '선풍기를 중풍으로 맞췄습니다.',
-          'fan_high': '선풍기를 강풍으로 맞췄습니다.',
-          'fan_off': '선풍기를 껐습니다.',
+          'fan_power': '선풍기 전원 버튼을 눌렀습니다.',
+          'fan_speed_cycle': '선풍기 풍량을 한 단계 변경했습니다.',
+          'fan_timer_cycle': '선풍기 타이머를 한 단계 변경했습니다.',
+          'fan_mute_toggle': '선풍기 음소거를 전환했습니다.',
           'scene_wake': '기상 장면을 실행했습니다.',
           'scene_away': '외출 장면을 실행했습니다.',
           'scene_arrival': '귀가 장면을 실행했습니다.',
@@ -658,14 +539,13 @@ automation:
         entity_id: input_boolean.ventilation_active
         state: "on"
     action:
-      - action: script.fan_off
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.ventilation_active
       - action: "{{ states('input_text.smarthome_notify_service') }}"
         data:
           title: "환기 완료"
-          message: "CO₂가 800ppm 아래로 10분간 유지됐습니다. 선풍기를 껐습니다. 창문을 직접 닫아 주세요."
+          message: "CO₂가 800ppm 아래로 10분간 유지됐습니다. 창문을 직접 닫아 주세요."
           data:
             tag: smarthome_ventilation_complete
 
