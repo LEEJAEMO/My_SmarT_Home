@@ -37,31 +37,19 @@ switchbot_ir_allowlist:
       command_type: command
     fan_power:
       device_id: !secret switchbot_fan_device_id
-      command: 전원
+      command: POWER
       command_type: customize
-    fan_low:
+    fan_speed_cycle:
       device_id: !secret switchbot_fan_device_id
-      command: 약풍
+      command: Fan Speed 3
       command_type: customize
-    fan_medium:
+    fan_timer_cycle:
       device_id: !secret switchbot_fan_device_id
-      command: 중풍
+      command: Timer
       command_type: customize
-    fan_high:
+    fan_mute_toggle:
       device_id: !secret switchbot_fan_device_id
-      command: 강풍
-      command_type: customize
-    fan_oscillate:
-      device_id: !secret switchbot_fan_device_id
-      command: 회전
-      command_type: customize
-    fan_natural:
-      device_id: !secret switchbot_fan_device_id
-      command: 자연풍
-      command_type: customize
-    fan_timer_2h:
-      device_id: !secret switchbot_fan_device_id
-      command: 2시간타이머
+      command: Mute
       command_type: customize
     light_on:
       device_id: !secret switchbot_light_device_id
