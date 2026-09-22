@@ -9,8 +9,9 @@ This repository contains a personal smart-home deployment for a Galaxy Book6 Pro
 - Do not expose `switchbot_ir_allowlist.send`, raw OpenAPI commands, credentials, or configuration helpers to Assist or an LLM.
 - The only supported air-conditioner presets are cooling 26°C, heating 20°C, dehumidify, and off. Do not add arbitrary temperature control without a matching learned IR preset.
 - Keep at least two seconds between IR commands and do not automatically retry toggle commands.
+- The Comfee fan uses `command_type: customize` with the exact SwitchBot button names `POWER`, `Fan Speed 3`, `Timer`, and `Mute`. Never commit the real fan remote device ID; keep it only in `/config/secrets.yaml`.
 - Never power-cut the projector. Use its normal remote shutdown so the cooling fan can finish.
-- Preserve the assumed-state guards for toggle-only fan and projector remotes.
+- Treat the Comfee fan as a stateless `Others` IR remote. Preserve exactly the `fan_power`, `fan_speed_cycle`, `fan_timer_cycle`, and `fan_mute_toggle` semantics; do not add assumed target-state automation or automatic retries. Preserve assumed-state guards for a toggle-only projector.
 - Treat SmartThings and the SwitchBot app as fallback paths; Home Assistant is the primary automation layer.
 - Keep the independent SwitchBot CO2 alerts because Home Assistant may be unavailable while the laptop is off.
 
