@@ -22,6 +22,7 @@ This repository contains a personal smart-home deployment for a Galaxy Book6 Pro
 - `home-assistant/custom_sentences/ko/`: deterministic Korean commands
 - `home-assistant/dashboards/`: dashboard YAML
 - `CHECKLIST.md`: physical setup and verification checklist
+- `docs/`: user-facing setup and operations manual mirrored from the Obsidian vault
 - `DEPLOYMENT_STATUS.md`: last verified deployment state
 
 ## Required checks before committing
@@ -34,4 +35,3 @@ This repository contains a personal smart-home deployment for a Galaxy Book6 Pro
 6. Update `DEPLOYMENT_STATUS.md` only with facts that were actually verified.
 
 Prefer a pull request for future behavioral changes. Explain changes to scenes, safety guards, exposure, thresholds, or IR state assumptions in the pull request body.
-

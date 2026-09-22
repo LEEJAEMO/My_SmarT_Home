@@ -31,6 +31,7 @@ flowchart LR
 - `home-assistant/secrets.yaml.example`: 계정 비밀값과 IR 가상 리모컨 ID 예시
 - `home-assistant/openai_instructions_ko.txt`: OpenAI 대화 에이전트에 붙여 넣을 안전 지침
 - `CHECKLIST.md`: 물리 리모컨 학습과 계정 연결을 포함한 최종 완료 절차
+- `docs/스마트홈 사용자 설정 및 운영 매뉴얼.md`: Obsidian에서도 사용할 수 있는 사용자 설정·운영 매뉴얼
 - `AGENTS.md`: ChatGPT/Codex가 이 저장소에서 작업할 때 지켜야 할 안전 규칙과 검증 절차
 
 ## 안전 설계
