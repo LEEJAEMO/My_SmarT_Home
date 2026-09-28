@@ -1,73 +1,37 @@
-# Galaxy 스마트홈 구축 묶음
+# Galaxy 스마트홈 구축 저장소
 
-이 폴더는 Galaxy Book6 Pro에서 Home Assistant OS를 실행하고, 구형 적외선 가전을 SwitchBot Hub Mini로 안전하게 제어하기 위한 배포 파일입니다.
+Galaxy Book6 Pro의 Home Assistant OS, SwitchBot Cloud, Hub Mini 및 Galaxy S23 Ultra용 설정과 검증 자료입니다. GitHub 저장소 변경만으로 실제 HA 설정이 바뀌지는 않습니다.
 
-```mermaid
-flowchart LR
-    S23["Galaxy S23 Ultra<br/>HA Assist / SmartThings / Bixby"]
-    Cloud["Home Assistant Cloud<br/>원격 접속·한국어 음성"]
-    HA["Galaxy Book6 Pro<br/>Home Assistant OS VM"]
-    AI["OpenAI gpt-5.6-luna<br/>허용된 스크립트만"]
-    SB["SwitchBot Cloud / OpenAPI<br/>허용 목록"]
-    Hub["SwitchBot Hub Mini"]
-    IR["Daikin / Comfee / 전등 / 프로젝터"]
-    ST["SmartThings<br/>보조 제어 경로"]
-    CO2["Meter Pro CO2<br/>SwitchBot 독립 경보"]
+## 2026-09-28 구현 기준
 
-    S23 --> Cloud --> HA
-    HA <--> AI
-    HA --> SB --> Hub --> IR
-    S23 --> ST --> SB
-    CO2 --> SB
-```
+- 실제 HA에 SwitchBot Cloud 기기 6개가 등록된 것을 확인했습니다. 09-27 읽기 전용 관찰에서는 커튼·CO₂ 센서가 unavailable이었습니다. 현재 상태는 다시 확인해야 합니다.
+- Daikin의 두 수동 패널은 각각 전원 토글, 모드 다음 단계, 종료 예약 다음 단계입니다. ‘끄기’나 특정 온도에 대응하는 확정 신호가 없어 기존 에어컨 프리셋 스크립트는 명시적으로 차단했습니다.
+- Comfee는 실기기 검증된 SwitchBot `Others` 리모컨의 `customize` 버튼 `POWER`, `Fan Speed 3`, `Timer`, `Mute`를 토글·순환으로 유지합니다. 약풍·강풍·2시간을 절대값으로 설정하지 않습니다. 실제 리모컨 ID는 HA의 `/config/secrets.yaml`에만 둡니다.
+- 기본 장면은 커튼 준비 동작만, 환기는 기록·CO₂ 조건부 알림만 담당합니다. 조명·프로젝터·Station은 실제 통신 방식과 동작 검증 후 연결합니다.
+- 수동 IR/HA 패널 명령은 `verified: false`가 기본값입니다. 실제 패널 의미·서비스·실기기 동작 확인 뒤 명령별로 켭니다. HA 응답은 명령 접수이며 물리 가전의 전원 피드백이 아닙니다.
+- 자동화·음성·알림도 각각 관리자 helper로 명시적으로 활성화합니다. SwitchBot 앱의 독립 CO₂ 경보는 별도로 유지합니다.
 
-## 포함 내용
+## 주요 파일
 
-- `setup/`: VirtualBox/HAOS 설치, Windows 전원·자동 시작 설정, 호스트 검증 스크립트
-- `home-assistant/packages/smart_home.yaml`: 기상·외출·귀가·영화·수면·환기 장면과 CO₂ 자동화
-- `home-assistant/custom_components/switchbot_ir_allowlist/`: SwitchBot OpenAPI 명령을 허용 목록으로만 실행하는 Home Assistant 사용자 통합
-- `home-assistant/custom_sentences/ko/`: 한국어 고정 명령 문장
-- `home-assistant/configuration.yaml.example`: Home Assistant에 합칠 최소 구성 예시
-- `home-assistant/secrets.yaml.example`: 계정 비밀값과 IR 가상 리모컨 ID 예시
-- `home-assistant/openai_instructions_ko.txt`: OpenAI 대화 에이전트에 붙여 넣을 안전 지침
-- `CHECKLIST.md`: 물리 리모컨 학습과 계정 연결을 포함한 최종 완료 절차
-- `docs/스마트홈 사용자 설정 및 운영 매뉴얼.md`: Obsidian에서도 사용할 수 있는 사용자 설정·운영 매뉴얼
-- `AGENTS.md`: ChatGPT/Codex가 이 저장소에서 작업할 때 지켜야 할 안전 규칙과 검증 절차
+| 파일 | 목적 |
+| --- | --- |
+| [적용 체크리스트](CHECKLIST.md) | 실제 HA 배포, 연결, 실기기 확인 순서 |
+| [개선 계획](docs/스마트홈%20실기기%20기반%20개선%20계획%202026-09-26.md) | 제품별 가능 범위와 단계 |
+| [패키지](home-assistant/packages/smart_home.yaml) | 안전 기본값의 장면·센서·알림 |
+| [대시보드](home-assistant/dashboards/smart_home.yaml) | 검증된 버튼만 표시하는 홈·관리 화면 |
+| [allowlist 통합](home-assistant/custom_components/switchbot_ir_allowlist/__init__.py) | 확인된 HA 엔티티 또는 IR 명령만, 2초 간격·중복 차단 |
+| [구성 예시](home-assistant/configuration.yaml.example) | 실제 `/config/configuration.yaml`에 병합할 예시 |
+| [검증](setup/06_validate_repository.ps1) | PowerShell/Python/YAML/JSON/Jinja·모의 백엔드 테스트 |
+| [에이전트 컨텍스트](PKM/llms.md) | 필요한 Spec/Module/Log로의 최소 라우팅 |
 
-## 안전 설계
+## 적용
 
-AI에는 장면과 프리셋 스크립트만 노출합니다. SwitchBot 토큰, 장치 ID, 임의 명령을 받는 서비스는 노출하지 않습니다. 적외선 명령은 전역 잠금으로 최소 2초 간격을 보장하며 자동 재시도하지 않습니다. Comfee 선풍기는 상태를 읽을 수 없는 `Others` IR 리모컨으로 운용하며 전원·풍량·타이머·음소거를 토글/순환 버튼으로만 제어합니다. 선풍기는 목표 상태 자동화를 하지 않고, 프로젝터가 토글형일 때만 추정 상태 가드를 유지합니다.
+`setup/06_validate_repository.ps1`로 로컬 코드를 먼저 검증합니다. 그다음 [CHECKLIST.md](CHECKLIST.md)의 복구본 생성, 실제 엔티티 대조, HA 구성 검사, 재시작, 실기기 검증 순서를 따릅니다. 이전 상태를 덮어쓰거나 실물 확인 전에 준비 장면을 자동으로 켜지 않습니다.
 
-## Comfee 선풍기 최종 사양
+Comfee는 기존 HA에서 `Others` 리모컨의 `POWER`·`Fan Speed 3`·`Timer`·`Mute`가 실제 동작했습니다. 새 allowlist v2에는 각각 `fan_power`·`fan_speed_cycle`·`fan_timer_cycle`·`fan_mute_toggle`로 대응하며 모두 기본 차단입니다. 실기기 재확인 뒤 하나씩 허용합니다. 선풍기는 목표 상태를 추정하거나 토글을 자동 재시도하지 않습니다.
 
-- SwitchBot 리모컨 유형: `Others`
-- OpenAPI 명령 방식: `command_type: customize`
-- 실제 사용 버튼명: `POWER`, `Fan Speed 3`, `Timer`, `Mute`
-- Home Assistant 동작: `fan_power`, `fan_speed_cycle`, `fan_timer_cycle`, `fan_mute_toggle`
-- `POWER`는 전원 토글, `Fan Speed 3`은 1 → 2 → 3 → 1 순환, `Timer`는 1시간 → … → 6시간 순환, `Mute`는 음소거 토글로 취급합니다.
-- 실제 IR 가상 리모컨 `deviceId`는 공개 저장소에 기록하지 않고 `/config/secrets.yaml`의 `switchbot_fan_device_id`에만 저장합니다.
+실제 Token, Secret, HA 접근키, 기기 ID, `/config/.storage`, DB, 백업, VM 디스크는 저장소에 넣지 않습니다. `secrets.yaml.example`은 자리표시자입니다.
 
-## 적용 순서
+## ChatGPT·GitHub 작업
 
-1. `setup/00_run_host_setup_as_admin.ps1`를 실행하고 Windows 관리자 승인을 허용해 VirtualBox와 VM을 만듭니다.
-2. 브라우저에서 `http://homeassistant.local`을 열고 최초 계정을 생성합니다. 열리지 않을 때만 `http://homeassistant.local:8123`을 시도합니다.
-3. File editor 또는 Samba share 애드온으로 `home-assistant/`의 파일을 `/config` 아래에 복사합니다.
-4. `configuration.yaml.example`의 내용을 실제 `/config/configuration.yaml`에 병합하고 `secrets.yaml.example`을 실제 값으로 채웁니다.
-5. Home Assistant에서 구성 검사를 통과한 뒤 재시작합니다.
-6. `CHECKLIST.md`에 따라 SwitchBot, Home Assistant Cloud, OpenAI, S23, SmartThings를 연결합니다.
-
-## ChatGPT·MCP로 계속 구축하기
-
-GitHub 저장소를 ChatGPT의 GitHub 커넥터에 연결한 뒤, 새 작업에서는 저장소 이름 `LEEJAEMO/My_SmarT_Home`과 원하는 변경을 함께 지정합니다. 에이전트는 먼저 `AGENTS.md`를 읽고 비밀값·IR 안전 규칙·검증 절차를 따라야 합니다.
-
-실제 Token, Secret, API 키, Home Assistant의 `/config/.storage`, 데이터베이스, 백업, VM 디스크는 공개 저장소에 올리지 않습니다. 저장소에는 `secrets.yaml.example`처럼 자리표시자만 유지합니다.
-
-## HAOS VM 문제 진단
-
-Home Assistant 2026.8 이후 HAOS/Supervisor 설치는 기본적으로 포트 80을 사용합니다. `:8123`만 검사하면 정상 시스템을 장애로 오판할 수 있습니다.
-
-```powershell
-& '.\setup\05_diagnose_haos_vm.ps1'
-```
-
-위 스크립트는 VM과 네트워크를 변경하지 않고 포트 80·8123·Observer 4357, 브리지 필터, VBS/Memory Integrity, VirtualBox NEM snail mode를 확인합니다. 데이터 보존형 복구 절차와 NAT 격리 시험은 `docs/HAOS VirtualBox 진단 및 복구.md`를 따릅니다.
+다음 작업에서는 [AGENTS.md](AGENTS.md)와 [PKM/llms.md](PKM/llms.md)를 먼저 읽고, 관련 Spec과 로그만 확인합니다. GitHub MCP는 코드·문서 관리 경로이며 HA 실시간 제어에는 인증된 HA 연결이 별도로 필요합니다.

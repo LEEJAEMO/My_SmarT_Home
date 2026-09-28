@@ -1,69 +1,56 @@
-language: ko
+language: "ko"
 intents:
   SmartHomePreset:
     data:
-      - sentences:
-          - "[다이킨] 에어컨[을] 냉방 26도[로] (켜|켜 줘|시작해|시작해 줘)"
-          - "냉방 26도[로] (켜|켜 줘|시작해|시작해 줘)"
-        slots:
-          action_name: aircon_cool_26
-      - sentences:
-          - "[다이킨] 에어컨[을] 난방 20도[로] (켜|켜 줘|시작해|시작해 줘)"
-          - "난방 20도[로] (켜|켜 줘|시작해|시작해 줘)"
-        slots:
-          action_name: aircon_heat_20
-      - sentences:
-          - "[다이킨] 에어컨 제습[을] (켜|켜 줘|시작해|시작해 줘)"
-        slots:
-          action_name: aircon_dry
-      - sentences:
-          - "[다이킨] 에어컨[을] (꺼|꺼 줘|종료해|종료해 줘)"
-        slots:
-          action_name: aircon_off
-      - sentences:
-          - "선풍기 전원"
-          - "선풍기[의] 전원[을] (눌러|눌러 줘|전환해|전환해 줘)"
-        slots:
-          action_name: fan_power
-      - sentences:
-          - "선풍기 풍량[을] (바꿔|바꿔 줘|변경해|변경해 줘)"
-          - "선풍기 풍량 다음"
-        slots:
-          action_name: fan_speed_cycle
-      - sentences:
-          - "선풍기 타이머[를] (바꿔|바꿔 줘|변경해|변경해 줘)"
-          - "선풍기 타이머 다음"
-        slots:
-          action_name: fan_timer_cycle
-      - sentences:
-          - "선풍기 음소거[를] (전환해|전환해 줘|눌러|눌러 줘)"
-        slots:
-          action_name: fan_mute_toggle
-      - sentences:
+      -
+        sentences:
           - "기상 (모드|장면)[를] (실행해|실행해 줘|시작해|시작해 줘)"
         slots:
-          action_name: scene_wake
-      - sentences:
+          action_name: "scene_wake"
+      -
+        sentences:
           - "외출 (모드|장면)[를] (실행해|실행해 줘|시작해|시작해 줘)"
         slots:
-          action_name: scene_away
-      - sentences:
+          action_name: "scene_away"
+      -
+        sentences:
           - "귀가 (모드|장면)[를] (실행해|실행해 줘|시작해|시작해 줘)"
         slots:
-          action_name: scene_arrival
-      - sentences:
+          action_name: "scene_arrival"
+      -
+        sentences:
           - "영화 (모드|장면)[를] (실행해|실행해 줘|시작해|시작해 줘)"
           - "영화 (모드|장면)"
         slots:
-          action_name: scene_movie
-      - sentences:
+          action_name: "scene_movie"
+      -
+        sentences:
           - "수면 (모드|장면)[를] (실행해|실행해 줘|시작해|시작해 줘)"
           - "수면 (모드|장면)"
         slots:
-          action_name: scene_sleep
-      - sentences:
+          action_name: "scene_sleep"
+      -
+        sentences:
           - "환기[를] (시작해|시작해 줘|실행해|실행해 줘)"
           - "환기 (모드|장면)"
         slots:
-          action_name: scene_ventilation
-
+          action_name: "scene_ventilation"
+      -
+        sentences:
+          - "환기 기록 (취소|취소해|취소해 줘)"
+        slots:
+          action_name: "ventilation_cancel"
+  SmartHomeUnsupported:
+    data:
+      -
+        sentences:
+          - "[다이킨] 에어컨[을] (꺼|꺼 줘|종료해|종료해 줘)"
+          - "[다이킨] 에어컨[을] (냉방|난방) {temperature}도[로] (켜|켜 줘|시작해)"
+          - "(냉방|난방) {temperature}도[로] (켜|켜 줘|시작해)"
+          - "선풍기 (강풍|약풍|중풍)[으로] [해 줘]"
+          - "(전부|모두|다) 꺼[ 줘]"
+lists:
+  temperature:
+    range:
+      from: 10
+      to: 40

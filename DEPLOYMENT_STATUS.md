@@ -1,5 +1,7 @@
 # 배포 상태 — 2026-09-22
 
+> 2026-09-28 현재 상태는 아래의 09-22 성공 기록과 다릅니다. 읽기 전용 진단에서 VM은 실행 중이고 Observer 4357은 응답했지만 HA Core UI 포트 80·8123은 응답하지 않았습니다. 본 저장소의 새 구성은 HA에 배포되지 않았으며 HA 런타임 구성 검사·대시보드 렌더링·실기기 시험도 아직 수행하지 않았습니다. 아래 항목은 각 날짜에 확인한 이력입니다.
+
 ## 실제 확인 완료
 
 - Oracle VirtualBox `7.2.18 r175117` 설치
@@ -25,9 +27,10 @@
 - Comfee 선풍기를 SwitchBot `Others` IR 리모컨으로 등록하고 `POWER`, `Fan Speed 3`, `Timer`, `Mute` custom 명령이 Home Assistant에서 실제 동작함을 확인
 - Comfee 실제 가상 리모컨 ID는 `/config/secrets.yaml`에만 저장하고 공개 저장소에는 기록하지 않음
 - Home Assistant `/config`가 Git `ha-deploy` 브랜치를 추적하도록 전환하고 `configuration.yaml` 및 기존 `secrets.yaml` 보존 확인
+- 위 Comfee 기록은 기존 배포의 실기기 확인이며, 이번 allowlist v2의 재배포 검증은 아님
 - Git diff 형식 검사와 비밀값 패턴 검사 통과
 
-## 현재 접속 주소
+## 2026-09-22 당시 접속 주소
 
 ```text
 http://homeassistant.local

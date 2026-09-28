@@ -1,100 +1,291 @@
-title: 스마트홈
+title: "스마트홈"
 views:
-  - title: 홈
-    path: home
-    icon: mdi:home
+  -
+    title: "홈"
+    path: "home"
+    icon: "mdi:home"
     cards:
-      - type: grid
-        title: 장면
-        columns: 3
-        square: false
-        cards:
-          - type: button
-            entity: script.scene_wake
-            name: 기상
-            icon: mdi:weather-sunset-up
-            tap_action:
-              action: toggle
-          - type: button
-            entity: script.scene_away
-            name: 외출
-            icon: mdi:home-export-outline
-            tap_action:
-              action: toggle
-          - type: button
-            entity: script.scene_arrival
-            name: 귀가
-            icon: mdi:home-import-outline
-            tap_action:
-              action: toggle
-          - type: button
-            entity: script.scene_movie
-            name: 영화
-            icon: mdi:movie-open
-            tap_action:
-              action: toggle
-          - type: button
-            entity: script.scene_sleep
-            name: 수면
-            icon: mdi:sleep
-            tap_action:
-              action: toggle
-          - type: button
-            entity: script.scene_ventilation
-            name: 환기
-            icon: mdi:window-open-variant
-            tap_action:
-              action: toggle
-
-      - type: entities
-        title: 에어컨 프리셋
+      -
+        type: "markdown"
+        content: "## 실제 패널 기반 스마트홈\n검증된 기능만 표시합니다. IR 전달 성공은 실제 전원·모드 확인이 아닙니다.\n에어컨 OFF 버튼은 **종료 예약 순환**일 수 있습니다. Hxlight·프로젝터 연동은 확인 대기입니다."
+      -
+        type: "entities"
+        title: "환경·요청 상태"
         show_header_toggle: false
         entities:
-          - entity: script.aircon_cool_26
-            name: 냉방 26도
-          - entity: script.aircon_heat_20
-            name: 난방 20도
-          - entity: script.aircon_dry
-            name: 제습
-          - entity: script.aircon_off
-            name: 끄기
-          - entity: input_select.aircon_assumed_mode
-
-      - type: entities
-        title: 선풍기
+          -
+            entity: "sensor.smarthome_co2"
+            name: "CO₂ (수신 지연 시 unavailable)"
+          -
+            entity: "sensor.smarthome_co2_last_report"
+            name: "HA 마지막 수신 (실측 시간 아님)"
+          -
+            entity: "binary_sensor.smarthome_co2_fresh"
+            name: "CO₂ 15분 이내 수신"
+          -
+            entity: "sensor.smarthome_temperature"
+            name: "실내 온도"
+          - "switchbot_ir_allowlist.status"
+          - "input_text.smarthome_scene_status"
+          - "input_boolean.ventilation_active"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_curtain_ready"
+            state: "on"
+        card:
+          type: "grid"
+          title: "커튼 준비 장면 (다른 가전 제외)"
+          columns: 2
+          square: false
+          cards:
+            -
+              type: "button"
+              name: "커튼 열기"
+              entity: "script.scene_wake"
+              tap_action:
+                action: "perform-action"
+                perform_action: "script.scene_wake"
+              hold_action:
+                action: "none"
+              double_tap_action:
+                action: "none"
+            -
+              type: "button"
+              name: "영화 준비"
+              entity: "script.scene_movie"
+              tap_action:
+                action: "perform-action"
+                perform_action: "script.scene_movie"
+              hold_action:
+                action: "none"
+              double_tap_action:
+                action: "none"
+            -
+              type: "button"
+              name: "수면 준비"
+              entity: "script.scene_sleep"
+              tap_action:
+                action: "perform-action"
+                perform_action: "script.scene_sleep"
+              hold_action:
+                action: "none"
+              double_tap_action:
+                action: "none"
+            -
+              type: "button"
+              name: "외출 준비"
+              entity: "script.scene_away"
+              tap_action:
+                action: "perform-action"
+                perform_action: "script.scene_away"
+              hold_action:
+                action: "none"
+              double_tap_action:
+                action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_daikin_power_once_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "에어컨 전원 버튼 1회"
+          entity: "script.aircon_power_once"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.aircon_power_once"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_daikin_mode_next_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "에어컨 모드 다음 단계"
+          entity: "script.aircon_mode_next"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.aircon_mode_next"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_daikin_timer_next_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "에어컨 종료 예약 다음 단계"
+          entity: "script.aircon_timer_next"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.aircon_timer_next"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_fan_power_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "선풍기 전원 버튼 1회"
+          entity: "script.fan_power"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.fan_power"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_fan_speed_cycle_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "선풍기 풍량 다음 단계"
+          entity: "script.fan_speed_cycle"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.fan_speed_cycle"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_fan_timer_cycle_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "선풍기 타이머 다음 단계"
+          entity: "script.fan_timer_cycle"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.fan_timer_cycle"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_fan_mute_toggle_ready"
+            state: "on"
+        card:
+          type: "button"
+          name: "선풍기 음소거 전환"
+          entity: "script.fan_mute_toggle"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.fan_mute_toggle"
+            confirmation:
+              text: "상태를 확인하고 버튼을 한 번만 보낼까요? 자동 재시도하지 않습니다."
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "binary_sensor.smarthome_co2_fresh"
+            state: "on"
+        card:
+          type: "button"
+          name: "창문 연 뒤 환기 기록 시작"
+          entity: "script.scene_ventilation"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.scene_ventilation"
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "conditional"
+        conditions:
+          -
+            entity: "input_boolean.ventilation_active"
+            state: "on"
+        card:
+          type: "button"
+          name: "환기 기록 취소"
+          entity: "script.ventilation_cancel"
+          tap_action:
+            action: "perform-action"
+            perform_action: "script.ventilation_cancel"
+          hold_action:
+            action: "none"
+          double_tap_action:
+            action: "none"
+      -
+        type: "markdown"
+        content: "### 연결 대기\n조명은 Hxlight 앱을 유지합니다. 프로젝터는 기존 리모컨으로 정상 종료하세요.\nStation은 모델·이벤트 확인 후 한 동작부터 연결합니다. 미검증 기능을 실행하는 버튼은 만들지 않습니다."
+  -
+    title: "관리"
+    path: "settings"
+    icon: "mdi:cog"
+    cards:
+      -
+        type: "markdown"
+        content: "관리 helper는 Assist에 노출하지 마세요. 이 탭은 접근권한 경계가 아닙니다. 연결 값을 바꾸면 검증 스위치를 끄고 재검증하세요. 자동화·음성·알림은 각각 검증 뒤 켭니다."
+      -
+        type: "entities"
+        title: "실제 엔티티 연결"
         show_header_toggle: false
         entities:
-          - entity: script.fan_power
-            name: 전원
-          - entity: script.fan_speed_cycle
-            name: 풍량 변경
-          - entity: script.fan_timer_cycle
-            name: 타이머 변경
-          - entity: script.fan_mute_toggle
-            name: 음소거
-
-      - type: entities
-        title: 전등·프로젝터
+          - "input_text.smarthome_curtain_entity"
+          - "input_text.smarthome_co2_entity"
+          - "input_text.smarthome_temperature_entity"
+          - "input_text.smarthome_resident_person"
+          - "input_text.smarthome_notify_service"
+      -
+        type: "entities"
+        title: "명시적 활성화"
         show_header_toggle: false
         entities:
-          - entity: script.light_on
-          - entity: script.light_off
-          - entity: script.light_brighter
-          - entity: script.light_dimmer
-          - entity: script.projector_on
-          - entity: script.projector_off
-          - entity: input_boolean.projector_discrete_power
-            name: 프로젝터 ON/OFF 분리 코드
-          - entity: input_boolean.projector_assumed_on
-
-      - type: entities
-        title: 연결 설정
+          - "input_boolean.smarthome_curtain_verified"
+          - "input_boolean.smarthome_automations_enabled"
+          - "input_boolean.smarthome_notifications_enabled"
+          - "input_boolean.smarthome_voice_enabled"
+      -
+        type: "entities"
+        title: "프로젝터 가드 (연동 보류)"
         show_header_toggle: false
         entities:
-          - entity: input_text.smarthome_resident_person
-          - entity: input_text.smarthome_curtain_entity
-          - entity: input_text.smarthome_co2_entity
-          - entity: input_text.smarthome_temperature_entity
-          - entity: input_text.smarthome_notify_service
-          - entity: input_boolean.ventilation_active
-
+          - "input_boolean.projector_discrete_power"
+          - "input_boolean.projector_assumed_on"
+          - "input_boolean.projector_state_known"
