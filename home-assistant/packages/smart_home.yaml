@@ -1,551 +1,954 @@
-# 구형 적외선 가전 중심 스마트홈 패키지
-# Home Assistant UI의 설정 > 장치 및 서비스 > 도우미에서 아래 input_text 값을
-# 실제 엔티티/알림 서비스 이름으로 바꿀 수 있습니다.
-
 input_text:
   smarthome_resident_person:
-    name: 스마트홈 재실 사용자 엔티티
-    initial: person.jason
+    name: "스마트홈 재실 사용자 엔티티"
     max: 100
   smarthome_curtain_entity:
-    name: SwitchBot 커튼 엔티티
-    initial: cover.switchbot_curtain
+    name: "SwitchBot 커튼 엔티티"
     max: 100
   smarthome_co2_entity:
-    name: SwitchBot CO2 엔티티
-    initial: sensor.switchbot_meter_pro_co2_carbon_dioxide
+    name: "SwitchBot CO2 엔티티"
     max: 100
   smarthome_temperature_entity:
-    name: SwitchBot 실내 온도 엔티티
-    initial: sensor.switchbot_meter_pro_co2_temperature
+    name: "SwitchBot 실내 온도 엔티티"
     max: 100
   smarthome_notify_service:
-    name: S23 알림 서비스
-    initial: notify.mobile_app_galaxy_s23_ultra
+    name: "S23 알림 서비스"
     max: 100
-
+  smarthome_scene_status:
+    name: "장면 마지막 요청 (실제 완료 아님)"
+    max: 255
 input_boolean:
   aircon_assumed_on:
-    name: 에어컨 추정 전원
-    icon: mdi:air-conditioner
+    name: "에어컨 추정 전원"
+    icon: "mdi:air-conditioner"
   projector_assumed_on:
-    name: 프로젝터 추정 전원
-    icon: mdi:projector
+    name: "프로젝터 추정 전원"
+    icon: "mdi:projector"
   projector_discrete_power:
-    name: 프로젝터 ON/OFF 분리 코드 사용
-    icon: mdi:power-settings
+    name: "프로젝터 ON/OFF 분리 코드 사용"
+    icon: "mdi:power-settings"
   ventilation_active:
-    name: 환기 장면 실행 중
-    icon: mdi:window-open-variant
-
+    name: "환기 장면 실행 중"
+    icon: "mdi:window-open-variant"
+    initial: false
+  smarthome_curtain_verified:
+    name: "관리자: 커튼 연결 검증 완료"
+  smarthome_automations_enabled:
+    name: "관리자: 재실·기상 자동화 허용"
+  smarthome_notifications_enabled:
+    name: "관리자: 환경 알림 허용"
+  projector_state_known:
+    name: "관리자: 프로젝터 실제 상태 확인"
+    initial: false
+  smarthome_voice_enabled:
+    name: "관리자: 검증된 준비 장면 음성 허용"
 input_select:
   aircon_assumed_mode:
-    name: 에어컨 추정 운전 상태
+    name: "에어컨 추정 운전 상태"
     options:
-      - 꺼짐
-      - 냉방26
-      - 난방20
-      - 제습
-    initial: 꺼짐
-    icon: mdi:air-conditioner
-
+      - "미확인"
+      - "꺼짐"
+      - "냉방26"
+      - "난방20"
+      - "제습"
+    initial: "미확인"
+    icon: "mdi:air-conditioner"
 script:
   aircon_cool_26:
-    alias: 에어컨 냉방 26도 시작
-    description: 구형 다이킨 에어컨을 냉방 26도·풍량 자동 프리셋으로 켭니다. 다른 냉방 온도에는 사용하지 않습니다.
-    icon: mdi:snowflake
-    mode: single
+    alias: "에어컨 냉방 26도 시작"
+    description: "이전 호출 호환성을 위한 차단용 스크립트. 실제 IR을 보내지 않습니다."
+    icon: "mdi:snowflake"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: daikin_cool_26
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.aircon_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.aircon_assumed_mode
-        data:
-          option: 냉방26
-
+      -
+        stop: "사용 불가: 현재 에어컨은 전원/모드/예약 토글·순환뿐입니다. 확정 프리셋을 먼저 검증하세요."
+        error: true
   aircon_heat_20:
-    alias: 에어컨 난방 20도 시작
-    description: 구형 다이킨 에어컨을 난방 20도·풍량 자동 프리셋으로 켭니다. 다른 난방 온도에는 사용하지 않습니다.
-    icon: mdi:fire
-    mode: single
+    alias: "에어컨 난방 20도 시작"
+    description: "이전 호출 호환성을 위한 차단용 스크립트. 실제 IR을 보내지 않습니다."
+    icon: "mdi:fire"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: daikin_heat_20
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.aircon_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.aircon_assumed_mode
-        data:
-          option: 난방20
-
+      -
+        stop: "사용 불가: 현재 에어컨은 전원/모드/예약 토글·순환뿐입니다. 확정 프리셋을 먼저 검증하세요."
+        error: true
   aircon_dry:
-    alias: 에어컨 제습 시작
-    description: 구형 다이킨 에어컨을 미리 학습한 제습 프리셋으로 켭니다.
-    icon: mdi:water-percent
-    mode: single
+    alias: "에어컨 제습 시작"
+    description: "이전 호출 호환성을 위한 차단용 스크립트. 실제 IR을 보내지 않습니다."
+    icon: "mdi:water-percent"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: daikin_dry
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.aircon_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.aircon_assumed_mode
-        data:
-          option: 제습
-
+      -
+        stop: "사용 불가: 현재 에어컨은 전원/모드/예약 토글·순환뿐입니다. 확정 프리셋을 먼저 검증하세요."
+        error: true
   aircon_off:
-    alias: 에어컨 끄기
-    description: 구형 다이킨 에어컨에 확정 OFF 적외선 신호를 보냅니다.
-    icon: mdi:air-conditioner
-    mode: queued
+    alias: "에어컨 끄기"
+    description: "이전 호출 호환성을 위한 차단용 스크립트. 실제 IR을 보내지 않습니다."
+    icon: "mdi:air-conditioner"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
-        data:
-          action: daikin_off
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.aircon_assumed_on
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.aircon_assumed_mode
-        data:
-          option: 꺼짐
-
+      -
+        stop: "사용 불가: 현재 에어컨은 전원/모드/예약 토글·순환뿐입니다. 확정 프리셋을 먼저 검증하세요."
+        error: true
   fan_power:
-    alias: 선풍기 전원
-    description: Comfee 선풍기의 POWER 버튼을 1회 전송합니다. 실제 전원 상태는 읽지 못하므로 토글 동작입니다.
-    icon: mdi:power
-    mode: single
+    alias: "선풍기 전원"
+    description: "Comfee 선풍기의 POWER 버튼을 1회 전송합니다. 실제 전원 상태는 읽지 못하므로 토글 동작입니다."
+    icon: "mdi:power"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: fan_power
-
+          action: "fan_power"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   fan_speed_cycle:
-    alias: 선풍기 풍량 변경
-    description: 풍량을 1 → 2 → 3 → 1 순서로 한 단계 변경합니다.
-    icon: mdi:fan
-    mode: single
+    alias: "선풍기 풍량 변경"
+    description: "풍량을 1 → 2 → 3 → 1 순서로 한 단계 변경합니다."
+    icon: "mdi:fan"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: fan_speed_cycle
-
+          action: "fan_speed_cycle"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   fan_timer_cycle:
-    alias: 선풍기 타이머 변경
-    description: 타이머를 1시간 → 2시간 → … → 6시간 순서로 한 단계 변경합니다.
-    icon: mdi:timer-outline
-    mode: single
+    alias: "선풍기 타이머 변경"
+    description: "타이머를 1시간 → 2시간 → … → 6시간 순서로 한 단계 변경합니다."
+    icon: "mdi:timer-outline"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: fan_timer_cycle
-
+          action: "fan_timer_cycle"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   fan_mute_toggle:
-    alias: 선풍기 음소거 전환
-    description: Comfee 선풍기의 Mute 버튼을 1회 전송합니다.
-    icon: mdi:volume-mute
-    mode: single
+    alias: "선풍기 음소거 전환"
+    description: "Comfee 선풍기의 Mute 버튼을 1회 전송합니다."
+    icon: "mdi:volume-mute"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: fan_mute_toggle
-
+          action: "fan_mute_toggle"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   light_on:
-    alias: 전등 켜기
-    description: 방 전등에 확정 ON 적외선 신호를 보냅니다.
-    icon: mdi:lightbulb-on
-    mode: queued
+    alias: "전등 켜기"
+    description: "방 전등에 확정 ON 적외선 신호를 보냅니다."
+    icon: "mdi:lightbulb-on"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: light_on
-
+          action: "light_on"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   light_off:
-    alias: 전등 끄기
-    description: 방 전등에 확정 OFF 적외선 신호를 보냅니다.
-    icon: mdi:lightbulb-off
-    mode: queued
+    alias: "전등 끄기"
+    description: "방 전등에 확정 OFF 적외선 신호를 보냅니다."
+    icon: "mdi:lightbulb-off"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: light_off
-
+          action: "light_off"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   light_brighter:
-    alias: 전등 밝게
-    description: 방 전등 밝기를 한 단계 올립니다.
-    icon: mdi:brightness-7
-    mode: queued
+    alias: "전등 밝게"
+    description: "방 전등 밝기를 한 단계 올립니다."
+    icon: "mdi:brightness-7"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: light_brighter
-
+          action: "light_brighter"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   light_dimmer:
-    alias: 전등 어둡게
-    description: 방 전등 밝기를 한 단계 낮춥니다.
-    icon: mdi:brightness-5
-    mode: queued
+    alias: "전등 어둡게"
+    description: "방 전등 밝기를 한 단계 낮춥니다."
+    icon: "mdi:brightness-5"
+    mode: "single"
     sequence:
-      - action: switchbot_ir_allowlist.send
+      -
+        action: "switchbot_ir_allowlist.send"
         data:
-          action: light_dimmer
-
+          action: "light_dimmer"
+      -
+        delay: "00:00:02"
+    max_exceeded: "silent"
   projector_on:
-    alias: 프로젝터 켜기
-    description: 프로젝터를 켭니다. 분리 ON 코드 또는 추정 상태가 꺼짐인 전원 토글만 사용합니다.
-    icon: mdi:projector
-    mode: single
+    alias: "프로젝터 켜기"
+    description: "프로젝터를 켭니다. 분리 ON 코드 또는 추정 상태가 꺼짐인 전원 토글만 사용합니다."
+    icon: "mdi:projector"
+    mode: "single"
     sequence:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.projector_discrete_power
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "template"
+                value_template: "{% set v = state_attr('switchbot_ir_allowlist.status', 'verified_actions') or [] %} {{ ('projector_on' in v and 'projector_off' in v) if is_state('input_boolean.projector_discrete_power','on') else 'projector_power' in v }}"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "template"
+                value_template: "{{ is_state('input_boolean.projector_discrete_power', 'on') or is_state('input_boolean.projector_state_known', 'on') }}"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        choose:
+          -
+            conditions:
+              -
+                condition: "state"
+                entity_id: "input_boolean.projector_discrete_power"
                 state: "on"
             sequence:
-              - action: switchbot_ir_allowlist.send
+              -
+                action: "switchbot_ir_allowlist.send"
                 data:
-                  action: projector_on
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.projector_assumed_on
+                  action: "projector_on"
+          -
+            conditions:
+              -
+                condition: "state"
+                entity_id: "input_boolean.projector_assumed_on"
                 state: "off"
             sequence:
-              - action: switchbot_ir_allowlist.send
+              -
+                action: "switchbot_ir_allowlist.send"
                 data:
-                  action: projector_power
-      - action: input_boolean.turn_on
+                  action: "projector_power"
+        default:
+          -
+            stop: "프로젝터가 이미 켜진 것으로 기록되어 있습니다. 물리 상태를 확인하세요."
+            error: true
+      -
+        action: "input_boolean.turn_on"
         target:
-          entity_id: input_boolean.projector_assumed_on
-
+          entity_id: "input_boolean.projector_assumed_on"
+      -
+        action: "input_boolean.turn_off"
+        target:
+          entity_id: "input_boolean.projector_state_known"
+      -
+        delay: "00:00:02"
   projector_off:
-    alias: 프로젝터 끄기
-    description: 프로젝터를 정상 종료합니다. 전원 토글형이면 Home Assistant가 켰다고 기록한 경우에만 실행합니다.
-    icon: mdi:projector-off
-    mode: single
+    alias: "프로젝터 끄기"
+    description: "프로젝터를 정상 종료합니다. 전원 토글형이면 Home Assistant가 켰다고 기록한 경우에만 실행합니다."
+    icon: "mdi:projector-off"
+    mode: "single"
     sequence:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.projector_discrete_power
-                state: "on"
-            sequence:
-              - action: switchbot_ir_allowlist.send
-                data:
-                  action: projector_off
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.projector_assumed_on
-                state: "on"
-            sequence:
-              - action: switchbot_ir_allowlist.send
-                data:
-                  action: projector_power
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.projector_assumed_on
-
-  scene_wake:
-    alias: 기상
-    description: 커튼을 열고 전등을 켜는 기상 장면입니다.
-    icon: mdi:weather-sunset-up
-    mode: single
-    sequence:
-      - action: cover.open_cover
-        target:
-          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
-      - action: script.light_on
-
-  scene_away:
-    alias: 외출
-    description: 에어컨과 전등을 끄고 커튼을 닫는 외출 장면입니다. 선풍기는 전원 토글 상태를 읽을 수 없어 자동 제어하지 않습니다. 프로젝터는 분리 OFF 코드가 있을 때만 끕니다.
-    icon: mdi:home-export-outline
-    mode: single
-    sequence:
-      - action: script.aircon_off
-      - action: script.light_off
-      - action: cover.close_cover
-        target:
-          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
-      - if:
-          - condition: state
-            entity_id: input_boolean.projector_discrete_power
-            state: "on"
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "template"
+                value_template: "{% set v = state_attr('switchbot_ir_allowlist.status', 'verified_actions') or [] %} {{ ('projector_on' in v and 'projector_off' in v) if is_state('input_boolean.projector_discrete_power','on') else 'projector_power' in v }}"
         then:
-          - action: script.projector_off
-
-  scene_arrival:
-    alias: 귀가
-    description: 낮에는 커튼, 밤에는 전등을 제어하고 실내 온도에 따라 안전한 에어컨 프리셋을 실행하는 귀가 장면입니다.
-    icon: mdi:home-import-outline
-    mode: single
-    sequence:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: sun.sun
-                state: above_horizon
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "template"
+                value_template: "{{ is_state('input_boolean.projector_discrete_power', 'on') or is_state('input_boolean.projector_state_known', 'on') }}"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        choose:
+          -
+            conditions:
+              -
+                condition: "state"
+                entity_id: "input_boolean.projector_discrete_power"
+                state: "on"
             sequence:
-              - action: cover.open_cover
+              -
+                action: "switchbot_ir_allowlist.send"
+                data:
+                  action: "projector_off"
+          -
+            conditions:
+              -
+                condition: "state"
+                entity_id: "input_boolean.projector_assumed_on"
+                state: "on"
+            sequence:
+              -
+                action: "switchbot_ir_allowlist.send"
+                data:
+                  action: "projector_power"
+        default:
+          -
+            stop: "프로젝터가 이미 꺼진 것으로 기록되어 있습니다. 물리 상태를 확인하세요."
+            error: true
+      -
+        action: "input_boolean.turn_off"
+        target:
+          entity_id: "input_boolean.projector_assumed_on"
+      -
+        action: "input_boolean.turn_off"
+        target:
+          entity_id: "input_boolean.projector_state_known"
+      -
+        delay: "00:00:02"
+  scene_wake:
+    alias: "기상 준비"
+    description: "검증된 커튼만 제어. 에어컨·선풍기·조명·프로젝터 자동 조작 없음."
+    mode: "single"
+    max_exceeded: "silent"
+    sequence:
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "binary_sensor.smarthome_curtain_ready"
+                state: "on"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "기상 준비 요청 진행 · 오류 시 Trace 확인"
+      -
+        action: "cover.open_cover"
+        target:
+          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "기상 준비: 커튼 요청 전달 · 다른 가전 제외"
+      -
+        delay: "00:00:02"
+  scene_away:
+    alias: "외출 준비"
+    description: "검증된 커튼만 제어. 에어컨·선풍기·조명·프로젝터 자동 조작 없음."
+    mode: "single"
+    max_exceeded: "silent"
+    sequence:
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "binary_sensor.smarthome_curtain_ready"
+                state: "on"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "외출 준비 요청 진행 · 오류 시 Trace 확인"
+      -
+        action: "cover.close_cover"
+        target:
+          entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "외출 준비: 커튼 요청 전달 · 다른 가전 제외"
+      -
+        delay: "00:00:02"
+  scene_arrival:
+    alias: "귀가 준비"
+    description: "낮에만 검증된 커튼 열기. 야간 조명 및 냉난방은 미검증으로 제외."
+    mode: "single"
+    sequence:
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "binary_sensor.smarthome_curtain_ready"
+                state: "on"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        choose:
+          -
+            conditions:
+              -
+                condition: "state"
+                entity_id: "sun.sun"
+                state: "above_horizon"
+            sequence:
+              -
+                action: "cover.open_cover"
                 target:
                   entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
+              -
+                action: "input_text.set_value"
+                target:
+                  entity_id: "input_text.smarthome_scene_status"
+                data:
+                  value: "귀가: 커튼 열기 요청 전달"
         default:
-          - action: script.light_on
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: >-
-                  {{ states(states('input_text.smarthome_temperature_entity')) | float(-999) > 28 }}
-            sequence:
-              - action: script.aircon_cool_26
-          - conditions:
-              - condition: template
-                value_template: >-
-                  {{ states(states('input_text.smarthome_temperature_entity')) | float(999) < 16 }}
-            sequence:
-              - action: script.aircon_heat_20
-
+          -
+            action: "input_text.set_value"
+            target:
+              entity_id: "input_text.smarthome_scene_status"
+            data:
+              value: "귀가: 야간 자동 조명·에어컨 제외, 실행된 가전 없음"
+      -
+        delay: "00:00:02"
   scene_movie:
-    alias: 영화
-    description: 커튼을 닫고 전등을 끈 뒤 2초 이상 간격을 두고 프로젝터를 켜는 영화 장면입니다.
-    icon: mdi:movie-open
-    mode: single
+    alias: "영화 준비"
+    description: "검증된 커튼만 제어. 에어컨·선풍기·조명·프로젝터 자동 조작 없음."
+    mode: "single"
+    max_exceeded: "silent"
     sequence:
-      - action: cover.close_cover
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "binary_sensor.smarthome_curtain_ready"
+                state: "on"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "영화 준비 요청 진행 · 오류 시 Trace 확인"
+      -
+        action: "cover.close_cover"
         target:
           entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
-      - action: script.light_off
-      - delay: "00:00:02"
-      - action: script.projector_on
-
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "영화 준비: 커튼 요청 전달 · 다른 가전 제외"
+      -
+        delay: "00:00:02"
   scene_sleep:
-    alias: 수면
-    description: 커튼과 조명을 정리하고 온도 조건부 에어컨 프리셋을 실행하는 수면 장면입니다. 선풍기는 전원·풍량·타이머가 순환/토글 방식이라 자동 제어하지 않습니다.
-    icon: mdi:sleep
-    mode: single
+    alias: "수면 준비"
+    description: "검증된 커튼만 제어. 에어컨·선풍기·조명·프로젝터 자동 조작 없음."
+    mode: "single"
+    max_exceeded: "silent"
     sequence:
-      - action: cover.close_cover
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "binary_sensor.smarthome_curtain_ready"
+                state: "on"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "수면 준비 요청 진행 · 오류 시 Trace 확인"
+      -
+        action: "cover.close_cover"
         target:
           entity_id: "{{ states('input_text.smarthome_curtain_entity') }}"
-      - action: script.light_off
-      - action: script.projector_off
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: >-
-                  {{ states(states('input_text.smarthome_temperature_entity')) | float(-999) >= 24 }}
-            sequence:
-              - action: script.aircon_cool_26
-          - conditions:
-              - condition: template
-                value_template: >-
-                  {{ states(states('input_text.smarthome_temperature_entity')) | float(999) <= 18 }}
-            sequence:
-              - action: script.aircon_heat_20
-
-  scene_ventilation:
-    alias: 환기
-    description: 사용자가 창문을 연 뒤 실행합니다. 에어컨을 끄고 환기 상태를 기록합니다. 선풍기는 필요하면 별도 버튼으로 수동 제어합니다.
-    icon: mdi:window-open-variant
-    mode: single
-    sequence:
-      - action: script.aircon_off
-      - action: input_boolean.turn_on
+      -
+        action: "input_text.set_value"
         target:
-          entity_id: input_boolean.ventilation_active
-
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "수면 준비: 커튼 요청 전달 · 다른 가전 제외"
+      -
+        delay: "00:00:02"
+  scene_ventilation:
+    alias: "환기 기록 시작"
+    description: "창문을 직접 연 뒤 시작. 가전 자동 제어 없음. 최신 CO₂ 수신이 필요."
+    mode: "single"
+    sequence:
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "binary_sensor.smarthome_co2_fresh"
+                state: "on"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        if:
+          -
+            condition: "not"
+            conditions:
+              -
+                condition: "state"
+                entity_id: "input_boolean.ventilation_active"
+                state: "off"
+        then:
+          -
+            stop: "연결·검증·센서 조건 미충족. 실행하지 않았습니다."
+            error: true
+      -
+        action: "input_boolean.turn_on"
+        target:
+          entity_id: "input_boolean.ventilation_active"
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "환기 기록 시작 · 창문·에어컨·선풍기는 직접 확인"
+  aircon_power_once:
+    alias: "에어컨 전원 버튼 1회"
+    description: "ON/OFF 모두 전원 토글. 실제 전원 피드백 없음."
+    mode: "single"
+    max_exceeded: "silent"
+    sequence:
+      -
+        action: "switchbot_ir_allowlist.send"
+        data:
+          action: "daikin_power_once"
+      -
+        delay: "00:00:02"
+  aircon_mode_next:
+    alias: "에어컨 모드 다음 단계"
+    description: "ON=자동→제습→냉방→난방→송풍 순환. 현재 모드를 추정하지 않음."
+    mode: "single"
+    max_exceeded: "silent"
+    sequence:
+      -
+        action: "switchbot_ir_allowlist.send"
+        data:
+          action: "daikin_mode_next"
+      -
+        delay: "00:00:02"
+  aircon_timer_next:
+    alias: "에어컨 종료 예약 다음 단계"
+    description: "OFF=1~9시간→없음 순환. 확정 종료나 예약 취소가 아님."
+    mode: "single"
+    max_exceeded: "silent"
+    sequence:
+      -
+        action: "switchbot_ir_allowlist.send"
+        data:
+          action: "daikin_timer_next"
+      -
+        delay: "00:00:02"
+  ventilation_cancel:
+    alias: "환기 기록 취소"
+    mode: "single"
+    sequence:
+      -
+        action: "input_boolean.turn_off"
+        target:
+          entity_id: "input_boolean.ventilation_active"
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "환기 기록 취소 · 가전 변경 없음"
 intent_script:
   SmartHomePreset:
     action:
-      - choose:
-          - conditions: "{{ action_name == 'aircon_cool_26' }}"
+      -
+        if:
+          -
+            condition: "state"
+            entity_id: "input_boolean.smarthome_voice_enabled"
+            state: "off"
+        then:
+          -
+            stop: "음성 제어 검증 전입니다."
+            error: true
+      -
+        choose:
+          -
+            conditions: "{{ action_name == 'scene_wake' }}"
             sequence:
-              - action: script.aircon_cool_26
-          - conditions: "{{ action_name == 'aircon_heat_20' }}"
+              -
+                action: "script.scene_wake"
+          -
+            conditions: "{{ action_name == 'scene_away' }}"
             sequence:
-              - action: script.aircon_heat_20
-          - conditions: "{{ action_name == 'aircon_dry' }}"
+              -
+                action: "script.scene_away"
+          -
+            conditions: "{{ action_name == 'scene_arrival' }}"
             sequence:
-              - action: script.aircon_dry
-          - conditions: "{{ action_name == 'aircon_off' }}"
+              -
+                action: "script.scene_arrival"
+          -
+            conditions: "{{ action_name == 'scene_movie' }}"
             sequence:
-              - action: script.aircon_off
-          - conditions: "{{ action_name == 'fan_power' }}"
+              -
+                action: "script.scene_movie"
+          -
+            conditions: "{{ action_name == 'scene_sleep' }}"
             sequence:
-              - action: script.fan_power
-          - conditions: "{{ action_name == 'fan_speed_cycle' }}"
+              -
+                action: "script.scene_sleep"
+          -
+            conditions: "{{ action_name == 'scene_ventilation' }}"
             sequence:
-              - action: script.fan_speed_cycle
-          - conditions: "{{ action_name == 'fan_timer_cycle' }}"
+              -
+                action: "script.scene_ventilation"
+          -
+            conditions: "{{ action_name == 'ventilation_cancel' }}"
             sequence:
-              - action: script.fan_timer_cycle
-          - conditions: "{{ action_name == 'fan_mute_toggle' }}"
-            sequence:
-              - action: script.fan_mute_toggle
-          - conditions: "{{ action_name == 'scene_wake' }}"
-            sequence:
-              - action: script.scene_wake
-          - conditions: "{{ action_name == 'scene_away' }}"
-            sequence:
-              - action: script.scene_away
-          - conditions: "{{ action_name == 'scene_arrival' }}"
-            sequence:
-              - action: script.scene_arrival
-          - conditions: "{{ action_name == 'scene_movie' }}"
-            sequence:
-              - action: script.scene_movie
-          - conditions: "{{ action_name == 'scene_sleep' }}"
-            sequence:
-              - action: script.scene_sleep
-          - conditions: "{{ action_name == 'scene_ventilation' }}"
-            sequence:
-              - action: script.scene_ventilation
+              -
+                action: "script.ventilation_cancel"
+        default:
+          -
+            stop: "현재 허용되지 않은 음성 명령입니다."
+            error: true
     speech:
-      text: >-
-        {% set answers = {
-          'aircon_cool_26': '에어컨을 냉방 26도로 켰습니다.',
-          'aircon_heat_20': '에어컨을 난방 20도로 켰습니다.',
-          'aircon_dry': '에어컨 제습을 시작했습니다.',
-          'aircon_off': '에어컨을 껐습니다.',
-          'fan_power': '선풍기 전원 버튼을 눌렀습니다.',
-          'fan_speed_cycle': '선풍기 풍량을 한 단계 변경했습니다.',
-          'fan_timer_cycle': '선풍기 타이머를 한 단계 변경했습니다.',
-          'fan_mute_toggle': '선풍기 음소거를 전환했습니다.',
-          'scene_wake': '기상 장면을 실행했습니다.',
-          'scene_away': '외출 장면을 실행했습니다.',
-          'scene_arrival': '귀가 장면을 실행했습니다.',
-          'scene_movie': '영화 장면을 실행했습니다.',
-          'scene_sleep': '수면 장면을 실행했습니다.',
-          'scene_ventilation': '환기를 시작했습니다. 창문을 열어 주세요.'
-        } %}
-        {{ answers.get(action_name, '지원하지 않는 명령입니다.') }}
-
+      text: "{{ states('input_text.smarthome_scene_status') }}. 적외선 기기의 실제 상태는 확인하지 않았습니다."
+  SmartHomeUnsupported:
+    speech:
+      text: "현재 에어컨은 전원 토글·모드·예약 순환만 가능합니다. 확정 끄기·온도 지정·선풍기 강풍·전체 끄기는 실행하지 않았습니다. 수동 리모컨을 확인하세요."
 automation:
-  - id: smarthome_wake_after_sunrise
-    alias: 스마트홈 - 일출 기반 기상
-    mode: single
+  -
+    id: "smarthome_wake_after_sunrise"
+    alias: "스마트홈 - 일출 기반 기상"
+    mode: "single"
     trigger:
-      - platform: sun
-        event: sunrise
+      -
+        platform: "sun"
+        event: "sunrise"
         offset: "00:30:00"
-        id: sunrise_plus_30
-      - platform: time
+        id: "sunrise_plus_30"
+      -
+        platform: "time"
         at: "06:30:00"
-        id: earliest_0630
+        id: "earliest_0630"
     condition:
-      - condition: template
-        value_template: >-
-          {{ is_state(states('input_text.smarthome_resident_person'), 'home') }}
-      - condition: or
-        conditions:
-          - condition: and
-            conditions:
-              - condition: trigger
-                id: sunrise_plus_30
-              - condition: time
-                after: "06:29:59"
-          - condition: and
-            conditions:
-              - condition: trigger
-                id: earliest_0630
-              - condition: state
-                entity_id: sun.sun
-                state: above_horizon
-              - condition: template
-                value_template: >-
-                  {{ (as_timestamp(now()) - as_timestamp(states.sun.sun.last_changed)) >= 1800 }}
-    action:
-      - action: script.scene_wake
-
-  - id: smarthome_away_after_10_minutes
-    alias: 스마트홈 - 10분 외출 감지
-    mode: single
-    trigger:
-      - platform: template
-        value_template: >-
-          {% set person_state = states(states('input_text.smarthome_resident_person')) %}
-          {{ person_state not in ['home', 'unknown', 'unavailable', 'none', ''] }}
-        for: "00:10:00"
-    action:
-      - action: script.scene_away
-
-  - id: smarthome_arrival
-    alias: 스마트홈 - 귀가 감지
-    mode: single
-    trigger:
-      - platform: template
-        value_template: >-
-          {{ is_state(states('input_text.smarthome_resident_person'), 'home') }}
-    action:
-      - action: script.scene_arrival
-
-  - id: smarthome_co2_notice_1000
-    alias: 스마트홈 - CO2 1000ppm 환기 알림
-    mode: single
-    trigger:
-      - platform: template
-        value_template: >-
-          {% set co2 = states(states('input_text.smarthome_co2_entity')) | float(0) %}
-          {{ co2 >= 1000 and co2 < 1500 }}
-    action:
-      - action: "{{ states('input_text.smarthome_notify_service') }}"
-        data:
-          title: "환기가 필요합니다"
-          message: "실내 CO₂가 1000ppm 이상입니다. 창문을 열고 ‘환기 시작’이라고 말해 주세요."
-          data:
-            tag: smarthome_co2_warning
-
-  - id: smarthome_co2_urgent_1500
-    alias: 스마트홈 - CO2 1500ppm 긴급 알림
-    mode: single
-    trigger:
-      - platform: template
-        value_template: >-
-          {{ states(states('input_text.smarthome_co2_entity')) | float(0) >= 1500 }}
-    action:
-      - action: "{{ states('input_text.smarthome_notify_service') }}"
-        data:
-          title: "긴급 환기 필요"
-          message: "실내 CO₂가 1500ppm 이상입니다. 지금 창문을 열어 충분히 환기해 주세요."
-          data:
-            tag: smarthome_co2_urgent
-            channel: alarm_stream
-            importance: high
-            ttl: 0
-            priority: high
-
-  - id: smarthome_ventilation_complete
-    alias: 스마트홈 - 환기 완료 감지
-    mode: single
-    trigger:
-      - platform: template
-        value_template: >-
-          {% set co2 = states(states('input_text.smarthome_co2_entity')) | float(0) %}
-          {{ co2 > 0 and co2 < 800 }}
-        for: "00:10:00"
-    condition:
-      - condition: state
-        entity_id: input_boolean.ventilation_active
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_automations_enabled"
         state: "on"
+      -
+        condition: "template"
+        value_template: "{{ is_state(states('input_text.smarthome_resident_person'), 'home') }}"
+      -
+        condition: "or"
+        conditions:
+          -
+            condition: "and"
+            conditions:
+              -
+                condition: "trigger"
+                id: "sunrise_plus_30"
+              -
+                condition: "time"
+                after: "06:29:59"
+          -
+            condition: "and"
+            conditions:
+              -
+                condition: "trigger"
+                id: "earliest_0630"
+              -
+                condition: "state"
+                entity_id: "sun.sun"
+                state: "above_horizon"
+              -
+                condition: "template"
+                value_template: "{{ (as_timestamp(now()) - as_timestamp(states.sun.sun.last_changed)) >= 1800 }}"
     action:
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.ventilation_active
-      - action: "{{ states('input_text.smarthome_notify_service') }}"
+      -
+        action: "script.scene_wake"
+  -
+    id: "smarthome_away_after_10_minutes"
+    alias: "스마트홈 - 10분 외출 감지"
+    mode: "single"
+    trigger:
+      -
+        platform: "template"
+        value_template: "{% set person_state = states(states('input_text.smarthome_resident_person')) %} {{ person_state not in ['home', 'unknown', 'unavailable', 'none', ''] }}"
+        for: "00:10:00"
+    action:
+      -
+        action: "script.scene_away"
+    condition:
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_automations_enabled"
+        state: "on"
+  -
+    id: "smarthome_arrival"
+    alias: "스마트홈 - 귀가 감지"
+    mode: "single"
+    trigger:
+      -
+        platform: "template"
+        value_template: "{{ is_state(states('input_text.smarthome_resident_person'), 'home') }}"
+    action:
+      -
+        action: "script.scene_arrival"
+    condition:
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_automations_enabled"
+        state: "on"
+  -
+    id: "smarthome_co2_notice_1000"
+    alias: "스마트홈 - CO2 1000ppm 환기 알림"
+    mode: "single"
+    trigger:
+      -
+        platform: "template"
+        value_template: "{{ is_state('binary_sensor.smarthome_co2_fresh', 'on') and (1000 <= (states('sensor.smarthome_co2') | float(0)) < 1500) }}"
+    action:
+      -
+        action: "{{ states('input_text.smarthome_notify_service') }}"
         data:
-          title: "환기 완료"
-          message: "CO₂가 800ppm 아래로 10분간 유지됐습니다. 창문을 직접 닫아 주세요."
+          title: "CO₂ 환기 안내"
+          message: "CO₂ {{ states('sensor.smarthome_co2') }} ppm. HA 마지막 수신 {{ states('sensor.smarthome_co2_last_report') }}. 창문과 에어컨 상태를 직접 확인하세요."
           data:
-            tag: smarthome_ventilation_complete
-
+            tag: "smarthome_co2"
+    condition:
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_notifications_enabled"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{{ states('input_text.smarthome_notify_service').startswith('notify.mobile_app_') }}"
+      -
+        condition: "state"
+        entity_id: "binary_sensor.smarthome_co2_fresh"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{{ this.attributes.last_triggered is none or (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered)) >= 1800 }}"
+  -
+    id: "smarthome_co2_urgent_1500"
+    alias: "스마트홈 - CO2 1500ppm 긴급 알림"
+    mode: "single"
+    trigger:
+      -
+        platform: "template"
+        value_template: "{{ is_state('binary_sensor.smarthome_co2_fresh', 'on') and ((states('sensor.smarthome_co2') | float(0)) >= 1500) }}"
+    action:
+      -
+        action: "{{ states('input_text.smarthome_notify_service') }}"
+        data:
+          title: "CO₂ 높은 수치 안내"
+          message: "CO₂ {{ states('sensor.smarthome_co2') }} ppm. HA 마지막 수신 {{ states('sensor.smarthome_co2_last_report') }}. 창문과 에어컨 상태를 직접 확인하세요."
+          data:
+            tag: "smarthome_co2"
+    condition:
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_notifications_enabled"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{{ states('input_text.smarthome_notify_service').startswith('notify.mobile_app_') }}"
+      -
+        condition: "state"
+        entity_id: "binary_sensor.smarthome_co2_fresh"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{{ this.attributes.last_triggered is none or (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered)) >= 1800 }}"
+  -
+    id: "smarthome_ventilation_complete"
+    alias: "스마트홈 - 새 CO2 수신으로 환기 완료 확인"
+    mode: "single"
+    trigger:
+      -
+        platform: "time_pattern"
+        minutes: "/1"
+    condition:
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_notifications_enabled"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{{ states('input_text.smarthome_notify_service').startswith('notify.mobile_app_') }}"
+      -
+        condition: "state"
+        entity_id: "binary_sensor.smarthome_ventilation_low"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{% set low = as_timestamp(states.binary_sensor.smarthome_ventilation_low.last_changed, 0) %} {% set s = states[states('input_text.smarthome_co2_entity')] %} {{ s is not none and as_timestamp(now()) - low >= 600 and as_timestamp(s.last_reported, 0) >= low + 600 }}"
+    action:
+      -
+        action: "{{ states('input_text.smarthome_notify_service') }}"
+        data:
+          title: "환기 수치 확인"
+          message: "새 CO₂ 수신에서 800ppm 미만이 다시 확인됐습니다. 연속 실측 보장은 아닙니다. 창문은 직접 확인하세요. 가전 변경 없음."
+          data:
+            tag: "smarthome_ventilation_complete"
+      -
+        action: "input_boolean.turn_off"
+        target:
+          entity_id: "input_boolean.ventilation_active"
+      -
+        action: "input_text.set_value"
+        target:
+          entity_id: "input_text.smarthome_scene_status"
+        data:
+          value: "환기 수치 확인 · 가전 변경 없음"
+  -
+    id: "smarthome_co2_stale"
+    alias: "스마트홈 - CO2 수신 지연"
+    mode: "single"
+    trigger:
+      -
+        platform: "state"
+        entity_id: "binary_sensor.smarthome_co2_fresh"
+        from: "on"
+        to: "off"
+        for: "00:02:00"
+    condition:
+      -
+        condition: "state"
+        entity_id: "input_boolean.smarthome_notifications_enabled"
+        state: "on"
+      -
+        condition: "template"
+        value_template: "{{ states('input_text.smarthome_notify_service').startswith('notify.mobile_app_') }}"
+    action:
+      -
+        action: "{{ states('input_text.smarthome_notify_service') }}"
+        data:
+          title: "CO₂ 수신 확인 필요"
+          message: "CO₂ 값이 없거나 HA 수신이 15분 이상 지연됐습니다. 환기 완료를 판정하지 않습니다. SwitchBot 독립 경보를 확인하세요."
+          data:
+            tag: "smarthome_co2_stale"
+template:
+  -
+    binary_sensor:
+      -
+        name: "smarthome_curtain_ready"
+        unique_id: "smarthome_curtain_ready"
+        state: "{% set e = states('input_text.smarthome_curtain_entity') %} {{ is_state('input_boolean.smarthome_curtain_verified','on') and e.startswith('cover.') and states(e) not in ['unknown','unavailable','none',''] }}"
+      -
+        name: "smarthome_co2_fresh"
+        unique_id: "smarthome_co2_fresh"
+        state: "{% set e = states('input_text.smarthome_co2_entity') %} {% set s = states[e] if e.startswith('sensor.') else none %} {% set age = as_timestamp(now()) - as_timestamp(s.last_reported, 0) if s is not none else 999999 %} {{ s is not none and is_number(s.state) and 0 < (s.state | float(0)) < 100000 and 0 <= age <= 900 }}"
+      -
+        name: "smarthome_ventilation_low"
+        unique_id: "smarthome_ventilation_low"
+        state: "{{ is_state('input_boolean.ventilation_active','on') and is_state('binary_sensor.smarthome_co2_fresh','on') and 0 < (states(states('input_text.smarthome_co2_entity')) | float(0)) < 800 }}"
+      -
+        name: "smarthome_daikin_power_once_ready"
+        unique_id: "smarthome_daikin_power_once_ready"
+        state: "{{ 'daikin_power_once' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+      -
+        name: "smarthome_daikin_mode_next_ready"
+        unique_id: "smarthome_daikin_mode_next_ready"
+        state: "{{ 'daikin_mode_next' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+      -
+        name: "smarthome_daikin_timer_next_ready"
+        unique_id: "smarthome_daikin_timer_next_ready"
+        state: "{{ 'daikin_timer_next' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+      -
+        name: "smarthome_fan_power_ready"
+        unique_id: "smarthome_fan_power_ready"
+        state: "{{ 'fan_power' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+      -
+        name: "smarthome_fan_speed_cycle_ready"
+        unique_id: "smarthome_fan_speed_cycle_ready"
+        state: "{{ 'fan_speed_cycle' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+      -
+        name: "smarthome_fan_timer_cycle_ready"
+        unique_id: "smarthome_fan_timer_cycle_ready"
+        state: "{{ 'fan_timer_cycle' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+      -
+        name: "smarthome_fan_mute_toggle_ready"
+        unique_id: "smarthome_fan_mute_toggle_ready"
+        state: "{{ 'fan_mute_toggle' in (state_attr('switchbot_ir_allowlist.status', 'verified_actions') or []) }}"
+    sensor:
+      -
+        name: "smarthome_co2"
+        unique_id: "smarthome_co2"
+        device_class: "carbon_dioxide"
+        unit_of_measurement: "ppm"
+        availability: "{{ is_state('binary_sensor.smarthome_co2_fresh','on') }}"
+        state: "{{ states(states('input_text.smarthome_co2_entity')) }}"
+      -
+        name: "smarthome_temperature"
+        unique_id: "smarthome_temperature"
+        device_class: "temperature"
+        unit_of_measurement: "°C"
+        availability: "{{ is_number(states(states('input_text.smarthome_temperature_entity'))) }}"
+        state: "{{ states(states('input_text.smarthome_temperature_entity')) }}"
+      -
+        name: "smarthome_co2_last_report"
+        unique_id: "smarthome_co2_last_report"
+        device_class: "timestamp"
+        availability: "{% set e = states('input_text.smarthome_co2_entity') %} {{ e.startswith('sensor.') and states[e] is not none }}"
+        state: "{% set s = states[states('input_text.smarthome_co2_entity')] %} {{ s.last_reported.isoformat() if s is not none else none }}"
