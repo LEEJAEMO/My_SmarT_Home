@@ -7,7 +7,7 @@ updated: 2026-09-28
 
 # 스마트홈 에이전트 컨텍스트
 
-> 2026-09-28 구현 기준: [S-005](Specs/S-005_verified-panel-implementation.md)와 [적용 체크리스트](../CHECKLIST.md)를 우선한다. 저장소 코드 오프라인 테스트 24개 통과. 실제 HA 반영과 재시작, 실기기 검증은 별개다. 09-27 HA UI에서 커튼·CO₂가 unavailable이었다. 09-28에는 Observer만 응답하고 Core UI는 불통이었다. 아래 09-22 기준점과 PR #1은 역사적 기록이다.
+> 2026-09-28 구현 기준: [S-005](Specs/S-005_verified-panel-implementation.md)와 [적용 체크리스트](../CHECKLIST.md)를 우선한다. 안전 구현은 [draft PR #4](https://github.com/LEEJAEMO/My_SmarT_Home/pull/4)에 게시했고 저장소 코드 오프라인 테스트 24개가 통과했다. 실제 HA 반영과 재시작, 실기기 검증은 별개다. 09-27 HA UI에서 커튼·CO₂가 unavailable이었다. 09-28에는 Observer만 응답하고 Core UI는 불통이었다. 아래 09-22 기준점과 PR #1은 역사적 기록이다.
 
 _Git, Home Assistant, ChatGPT/Codex가 작업을 이어갈 때 가장 먼저 읽는 최소 컨텍스트입니다._
 

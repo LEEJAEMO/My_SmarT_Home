@@ -2,7 +2,7 @@
 type: pkm-work-log
 date: 2026-09-28
 title: 실제 패널 기반 안전 구현과 HA 접속 진단
-status: local-implementation-validated-live-deployment-pending
+status: draft-pr-open-live-deployment-pending
 live_changes: false
 topics: [home-assistant, switchbot, audit, github]
 ---
@@ -13,7 +13,8 @@ topics: [home-assistant, switchbot, audit, github]
 
 - 로컬 `main` HEAD `df46467`, `AGENTS.md`·`README.md` 및 `PKM/` 미커밋 변경이 있었다. 기존 변경을 reset/checkout으로 버리지 않았다.
 - 09-27 인증된 HA UI: SwitchBot Cloud 기기 6개 등록, 두 에어컨 수동 패널은 switch 엔티티, 커튼·CO₂ 센서는 unavailable. 어떤 실기기 명령도 실행하지 않았다.
-- GitHub MCP로 `LEEJAEMO/My_SmarT_Home`의 저장소 권한과 main 소스를 읽었다. 로컬 Git HTTPS 접속은 불가한 환경이다.
+- GitHub MCP로 `LEEJAEMO/My_SmarT_Home`의 저장소 권한과 main 소스를 읽었다. 로컬 `git fetch`는 가능했지만 비대화형 `git push`에는 인증이 없어 실패해 GitHub MCP로 게시했다.
+- 원격 `main`의 추가 Comfee 실기기 확인 기록을 최신 브랜치에 병합했다. 원격 기존 내용을 reset/checkout으로 버리지 않았다.
 
 ## 구현
 
@@ -30,6 +31,7 @@ topics: [home-assistant, switchbot, audit, github]
 - 09-28 14:23 JST 읽기 전용 `setup/05_diagnose_haos_vm.ps1`: VirtualBox 7.2.18, VM running, Wi-Fi 브리지 필터 on, NEM snail mode, Observer 4357 true, Core UI 80/8123 false. 웹 UI 배포·구성 검사·재시작은 못 했다. 09-27 실기기 unavailable 상태는 현재 재확인이 필요하다.
 - UI audit: 이전 활성 dashboard는 기본 HA 카드였고 장면 `toggle` 6개가 관찰됐다. 새 dashboard는 HA에 미배포라 활성 리소스 parity·프런트엔드 클릭·S23 touch·실기기 검증은 미실행. 모의 백엔드 테스트가 이를 대체하지 않는다.
 - 자격 증명이나 실제 device ID를 저장소로 옮기지 않았다. 운영 HA의 기존 파일은 아직 변경하지 않았다.
+- 2026-09-28 GitHub draft [PR #4](https://github.com/LEEJAEMO/My_SmarT_Home/pull/4)를 `codex/verified-panel-safety` → `main`으로 열었다. GitHub 게시 트리 SHA는 로컬 브랜치 트리 SHA와 동일함을 확인했다. PR은 리뷰 대상이며 HA 배포를 의미하지 않는다.
 
 ## 다음 시작점
 
